@@ -174,6 +174,7 @@ internal object WeChatAccessUtil {
                 //微信7.0.4版本特殊处理，7.0.4只能从父控件点击，然后这个通过当前页面文案来查找控件，要排除输入框的内容
                 val node = viewList[i]
                 val parentNode = node.parent
+
                 if (node.text.toString() == text && node.className == TEXT_VIEW) {
                     parentNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                     break

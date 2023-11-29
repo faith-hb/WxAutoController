@@ -4,21 +4,25 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import com.zbycorp.filepicker.ZbyFilePicker
 import com.zbycorp.filepicker.ui.FilePickerActivity
-import com.zbycorp.wx.R
-import com.zbycorp.wx.utils.*
-import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.StringBuilder
+import com.zbycorp.wx.databinding.ActivityMainBinding
+import com.zbycorp.wx.utils.FileUtils
+import com.zbycorp.wx.utils.WeChatAccessUtil
+import com.zbycorp.wx.utils.async
+import com.zbycorp.wx.utils.isEmpty
+import com.zbycorp.wx.utils.sync
+import com.zbycorp.wx.utils.toast
 import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
@@ -27,12 +31,14 @@ class MainActivity : AppCompatActivity() {
     private val fileRequestCode = 200
 
     private val excelPattern = Pattern.compile(".+.xlsx")
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        btn_import.setOnClickListener {
+        binding.btnImport.setOnClickListener {
             if (PermissionChecker.checkSelfPermission(
                     this,
                     Manifest.permission.READ_EXTERNAL_STORAGE
@@ -46,10 +52,13 @@ class MainActivity : AppCompatActivity() {
             } else {
                 importExcel()
             }
-
+//            val intent =
+//                Intent(Intent.ACTION_VIEW, Uri.parse("zhubobao://zxhy.com/inviteJoin?senderId=12&bizId=1&bizName=智行合一"))
+//            startActivity(intent)
+//            finish()
         }
 
-        btn_send.setOnClickListener {
+        binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
                 WeChatAccessUtil.openWeChat(this)
             } else {
@@ -92,11 +101,11 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == fileRequestCode && resultCode == Activity.RESULT_OK) {
             val path = data?.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
             if (!path.isEmpty()) {
-                pb_main.visibility = View.VISIBLE
+                binding.pbMain.visibility = View.VISIBLE
                 async {
                     val datas = FileUtils.parseExcel(path!!)
                     sync {
-                        pb_main.visibility = View.GONE
+                        binding.pbMain.visibility = View.GONE
                     }
 
                     val sb = StringBuilder()
@@ -106,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                             .append(it.second)
                             .append("\n")
                     }
-                    tv_content.text = sb.toString()
+                    binding.tvContent.text = sb.toString()
                     WeChatAccessUtil.nameContentList = datas
                 }
             }

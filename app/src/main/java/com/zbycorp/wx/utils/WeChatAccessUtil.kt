@@ -13,6 +13,8 @@ import android.view.accessibility.AccessibilityNodeInfo
 
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+import com.zbycorp.wx.access.WeChatAccessService.Companion.TAG
+import com.zbycorp.wx.contants.KsResId
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -129,11 +131,12 @@ internal object WeChatAccessUtil {
 
     @Throws(InterruptedException::class)
     fun mockKsMessage(service: AccessibilityService) {
-//        Thread.sleep(500)
-//        findViewIdAndPerformClick(
-//            service,
-//            "com.smile.gifmaker:id/live_comment_text_view"
-//        )
+
+        Thread.sleep(500)
+        findViewIdAndGetText(
+            service,
+            KsResId.LIVE_PAGE.AUDIENCE_COUNT
+        )
 //        Thread.sleep(1500)
 //        fillInput(
 //            service,
@@ -275,6 +278,21 @@ internal object WeChatAccessUtil {
                 //微信7.0.4版本特殊处理
                 val nodeInfo = viewList[i].parent
                 nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            }
+        }
+    }
+
+    /**
+     * 查找节点并模拟点击
+     *
+     * @param viewId
+     */
+    private fun findViewIdAndGetText(service: AccessibilityService, viewId: String) {
+        val viewList = findNodesByViewId(service, viewId)
+        if (viewList?.isNotEmpty() == true) {
+            for (accessibilityNodeInfo in viewList) {
+                // 获取当前文本内容
+                Log.i(TAG, "accessibilityNodeInfo：${accessibilityNodeInfo.text}")
             }
         }
     }

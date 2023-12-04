@@ -3,11 +3,14 @@ package com.zbycorp.wx.access
 import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import com.zbycorp.wx.contants.KsResId
 import com.zbycorp.wx.utils.WeChatAccessUtil
 
 class WeChatAccessService : AccessibilityService() {
 
-    private val TAG = "助手"
+    companion object {
+        const val TAG = "助手"
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
 //        Log.i(TAG,"eventType=${event.eventType}")
@@ -33,9 +36,13 @@ class WeChatAccessService : AccessibilityService() {
                         Log.i(TAG, "进入快手首页")
 //                        WeChatAccessUtil.mockKsMessage(this@WeChatAccessService)
                     }
-                    "com.yxcorp.gifshow.detail.PhotoDetailActivity" -> {
+                    KsResId.LIVE_PAGE -> {
                         Log.i(TAG, "进入快手直播间页面")
                         WeChatAccessUtil.mockKsMessage(this@WeChatAccessService)
+                    }
+
+                    KsResId.USER_PROFILE_PAGE -> {
+                        Log.i(TAG, "进入快手他人主页页面")
                     }
                     WeChatAccessUtil.WECHAT_CLASS_CHATUI -> Log.i(TAG, "微信聊天页面启动")
                 }

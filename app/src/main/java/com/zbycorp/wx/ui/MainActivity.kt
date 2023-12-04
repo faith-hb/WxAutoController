@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
@@ -56,8 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
-                WeChatAccessUtil.openKsApp(this)
-//                WeChatAccessUtil.openMockApp(this)
+                WeChatAccessUtil.openWeChat(this)
                 Log.i("助手","打开模拟APP")
             } else {
                 AlertDialog.Builder(this@MainActivity)

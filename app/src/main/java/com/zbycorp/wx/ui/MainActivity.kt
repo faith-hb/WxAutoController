@@ -52,15 +52,13 @@ class MainActivity : AppCompatActivity() {
             } else {
                 importExcel()
             }
-//            val intent =
-//                Intent(Intent.ACTION_VIEW, Uri.parse("zhubobao://zxhy.com/inviteJoin?senderId=12&bizId=1&bizName=智行合一"))
-//            startActivity(intent)
-//            finish()
         }
 
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
-                WeChatAccessUtil.openWeChat(this)
+                WeChatAccessUtil.openKsApp(this)
+//                WeChatAccessUtil.openMockApp(this)
+                Log.i("助手","打开模拟APP")
             } else {
                 AlertDialog.Builder(this@MainActivity)
                     .setMessage("请在无障碍服务中给该应用授权，否则无法使用该软件")

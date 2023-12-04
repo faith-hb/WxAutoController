@@ -6,11 +6,13 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
 import android.text.TextUtils
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -42,11 +44,11 @@ internal object WeChatAccessUtil {
     /**
      * 搜索id
      */
-    private val SEARCH_ID = BASELAYOUT_ID + "jb"
+    private val SEARCH_ID = BASELAYOUT_ID + "meb"
     /**
      * 搜素输入框
      */
-    private val SEARCH_INPUT_ID = BASELAYOUT_ID + "l3"
+    private val SEARCH_INPUT_ID = BASELAYOUT_ID + "d98"
     /**
      * 搜索结果item
      */
@@ -54,19 +56,19 @@ internal object WeChatAccessUtil {
     /**
      * 聊天界面的输入框
      */
-    private val CHAT_INPUT_ID = BASELAYOUT_ID + "ami"
+    private val CHAT_INPUT_ID = BASELAYOUT_ID + "bkk"
     /**
      * 聊天界面发送按钮
      */
-    private val SEND_ID = BASELAYOUT_ID + "amp"
+    private val SEND_ID = BASELAYOUT_ID + "bql"
     /**
      * 聊天界面退出按钮
      */
-    private val CHAT_SEND_BACK_ID = BASELAYOUT_ID + "kn"
+    private val CHAT_SEND_BACK_ID = BASELAYOUT_ID + "a4p"
     /**
      * 搜索界面退出按钮
      */
-    private val SEARCH_SEND_BACK_ID = BASELAYOUT_ID + "l1"
+    private val SEARCH_SEND_BACK_ID = BASELAYOUT_ID + "b5i"
 
     /**
      * 名字及内容
@@ -87,6 +89,77 @@ internal object WeChatAccessUtil {
         activity.startActivity(intent)
     }
 
+    fun openKsApp(activity: Activity){
+        val intent = Intent()
+        intent.flags = FLAG_ACTIVITY_NEW_TASK
+        intent.setClassName(
+            "com.smile.gifmaker",
+            "com.yxcorp.gifshow.HomeActivity"
+        )
+        activity.startActivity(intent)
+    }
+
+    fun openMockApp(activity: Activity) {
+        val intent = Intent()
+        intent.flags = FLAG_ACTIVITY_NEW_TASK
+        intent.setClassName(
+            "com.hongb.funcdemo",
+            "com.hongb.funcdemo.lib.thread.InterfaceActivity"
+        )
+        activity.startActivity(intent)
+    }
+
+    @Throws(InterruptedException::class)
+    fun mockSendMessage(service: AccessibilityService) {
+//        val viewList = findNodesByViewId(
+//            service,
+//            SEARCH_ID
+//        )
+        Thread.sleep(500)
+        findViewIdAndPerformClick(
+            service,
+            "com.hongb.funcdemo:id/addDataBtn"
+        )
+        Thread.sleep(2500)
+        findViewIdAndPerformClick(
+            service,
+            "com.hongb.funcdemo:id/getDataBtn"
+        )
+    }
+
+    @Throws(InterruptedException::class)
+    fun mockKsMessage(service: AccessibilityService) {
+//        Thread.sleep(500)
+//        findViewIdAndPerformClick(
+//            service,
+//            "com.smile.gifmaker:id/live_comment_text_view"
+//        )
+//        Thread.sleep(1500)
+//        fillInput(
+//            service,
+//            "com.smile.gifmaker:id/editor",
+//            "谢谢进入直播间"
+//        )
+//        Thread.sleep(1500)
+//        findViewIdAndPerformClick(
+//            service,
+//            "com.smile.gifmaker:id/finish_button"
+//        )
+
+//        Thread.sleep(500)
+//        Log.i("助手", "mock快手开播点击")
+//        findViewIdAndPerformClick(
+//            service,
+//            "com.smile.gifmaker:id/shoot_container"
+//        )
+//        Thread.sleep(2500)
+//        Log.i("助手", "mock快手搜索点击")
+//        findViewIdAndPerformClick(
+//            service,
+//            "com.smile.gifmaker:id/search_btn"
+//        )
+    }
+
     /**
      * 搜索
      *
@@ -95,49 +168,56 @@ internal object WeChatAccessUtil {
      */
     @Throws(InterruptedException::class)
     fun sendMessage(service: AccessibilityService) {
-        val viewList = findNodesByViewId(
+//        val viewList = findNodesByViewId(
+//            service,
+//            SEARCH_ID
+//        )
+        Thread.sleep(500)
+        Log.i("助手", "mock微信点击")
+        findViewIdAndPerformClick(
             service,
-            SEARCH_ID
+//            SEARCH_ID
+            "com.tencent.mm:id/h5y"
         )
-        if (viewList != null && viewList.isNotEmpty()) {
-            for (accessibilityNodeInfo in viewList) {
-                //微信7.0.4版本特殊处理
-                val nodeInfo = accessibilityNodeInfo.parent
-                if (TextUtils.isEmpty(nodeInfo.contentDescription)) {
-                    nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    Thread.sleep(500)
-                    fillInput(
-                        service,
-                        SEARCH_INPUT_ID,
-                        nameContentList?.get(0)?.first
-                    )
-                    Thread.sleep(500)
-                    findViewAndPerformClickParentByText(service, nameContentList?.get(0)?.first)
-                    Thread.sleep(500)
-                    findViewIdAndPerformClick(
-                        service,
-                        CHAT_INPUT_ID
-                    )
-                    Thread.sleep(500)
-                    fillInput(
-                        service,
-                        CHAT_INPUT_ID,
-                        nameContentList?.get(0)?.second
-                    )
-                    Thread.sleep(500)
-                    findViewIdAndPerformClick(
-                        service,
-                        SEND_ID
-                    )
-                    findViewAndPerformClickParent(service, CHAT_SEND_BACK_ID)
-                    Thread.sleep(500)
-                    findViewAndPerformClickParent(service, SEARCH_SEND_BACK_ID)
-
-                    nameContentList?.removeAt(0)
-                    break
-                }
-            }
-        }
+//        if (!viewList.isNullOrEmpty()) {
+//            for (accessibilityNodeInfo in viewList) {
+//                //微信7.0.4版本特殊处理
+//                val nodeInfo = accessibilityNodeInfo.parent
+//                if (TextUtils.isEmpty(nodeInfo.contentDescription)) {
+//                    nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+//                    Thread.sleep(500)
+//                    fillInput(
+//                        service,
+//                        SEARCH_INPUT_ID,
+//                        nameContentList?.get(0)?.first
+//                    )
+//                    Thread.sleep(500)
+//                    findViewAndPerformClickParentByText(service, nameContentList?.get(0)?.first)
+//                    Thread.sleep(500)
+//                    findViewIdAndPerformClick(
+//                        service,
+//                        CHAT_INPUT_ID
+//                    )
+//                    Thread.sleep(500)
+//                    fillInput(
+//                        service,
+//                        CHAT_INPUT_ID,
+//                        nameContentList?.get(0)?.second
+//                    )
+//                    Thread.sleep(500)
+//                    findViewIdAndPerformClick(
+//                        service,
+//                        SEND_ID
+//                    )
+//                    findViewAndPerformClickParent(service, CHAT_SEND_BACK_ID)
+//                    Thread.sleep(500)
+//                    findViewAndPerformClickParent(service, SEARCH_SEND_BACK_ID)
+//
+//                    nameContentList?.removeAt(0)
+//                    break
+//                }
+//            }
+//        }
     }
 
     /**

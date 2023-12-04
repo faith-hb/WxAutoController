@@ -22,6 +22,10 @@ public interface KsResId {
      * 他人主页
      */
     String USER_PROFILE_PAGE = "com.yxcorp.gifshow.profile.activity.UserProfileActivity";
+    /**
+     * 他人私信页面
+     */
+    String IM_CHAT_PAGE = "com.yxcorp.gifshow.message.imchat.acivity.IMChatActivity";
 
     /**
      * 直播间页面
@@ -47,5 +51,15 @@ public interface KsResId {
         String SEND_MESSAGE_SMALL_ICON = "send_message_small_icon";
         // 观众关注/回关
         String HEADER_FOLLOW_BUTTON = "header_follow_button";
+    }
+
+    /**
+     * 他人私信页面
+     */
+    interface IM_CHAT_PAGE {
+        // 评论输入框
+        String EDITOR = BASE_LAYOUT_ID + "editor";
+        // 发送按钮
+        String SEND_BTN = BASE_LAYOUT_ID + "send_btn";
     }
 }

@@ -9,7 +9,7 @@ import com.zbycorp.wx.utils.WeChatAccessUtil
 class WeChatAccessService : AccessibilityService() {
 
     companion object {
-        const val TAG = "助手"
+        const val TAG = "主播助手"
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -18,16 +18,6 @@ class WeChatAccessService : AccessibilityService() {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> { // 界面变化事件
                 Log.i(TAG,"className=${event.className}")
                 when (event.className.toString()) {
-                    WeChatAccessUtil.WECHAT_CLASS_LAUNCHUI -> { // 进入微信首页
-                        try {
-                            Log.i(TAG,"nameContentList长度=${WeChatAccessUtil.nameContentList?.size}")
-//                            if (WeChatAccessUtil.nameContentList?.isNotEmpty() == true) {
-                                WeChatAccessUtil.sendMessage(this@WeChatAccessService)
-//                            }
-                        } catch (e: InterruptedException) {
-                            e.printStackTrace()
-                        }
-                    }
                     "com.hongb.funcdemo.lib.thread.InterfaceActivity" -> {
                         Log.i(TAG, "进入mockApp首页")
                         WeChatAccessUtil.mockSendMessage(this@WeChatAccessService)
@@ -44,7 +34,10 @@ class WeChatAccessService : AccessibilityService() {
                     KsResId.USER_PROFILE_PAGE -> {
                         Log.i(TAG, "进入快手他人主页页面")
                     }
-                    WeChatAccessUtil.WECHAT_CLASS_CHATUI -> Log.i(TAG, "微信聊天页面启动")
+
+                    KsResId.IM_CHAT_PAGE -> {
+                        Log.i(TAG, "进入快手他人主页页面")
+                    }
                 }
             }
             AccessibilityEvent.TYPE_VIEW_CLICKED -> {
@@ -52,8 +45,6 @@ class WeChatAccessService : AccessibilityService() {
                 Log.i(TAG, "模拟点击(来自监听Service的响应)：${nodeInfo?.text}")
             }
         }
-
-
     }
 
     override fun onInterrupt() {

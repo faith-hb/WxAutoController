@@ -9,11 +9,12 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
-import com.zbycorp.wx.access.WeChatAccessService.Companion.TAG
+import android.widget.Toast
 import com.zbycorp.wx.contants.KsResId
 import java.util.*
 
-internal object WeChatAccessUtil {
+internal object KsAccessUtil {
+    const val TAG = "快手"
     /**
      * textView
      */
@@ -22,6 +23,16 @@ internal object WeChatAccessUtil {
      * 输入框
      */
     private val EDIT_TEXT = "android.widget.EditText"
+
+    /**
+     * 他人主页的自动化是否执行完毕
+     */
+    private var userProfileIsExecuteFinish = false
+
+    /**
+     * 私信页面的自动化是否执行完毕
+     */
+    private var imChatIsExecuteFinish = false
 
     fun openKsApp(activity: Activity) {
         val intent = Intent()
@@ -33,53 +44,31 @@ internal object WeChatAccessUtil {
         activity.startActivity(intent)
     }
 
-    fun openMockApp(activity: Activity) {
-        val intent = Intent()
-        intent.flags = FLAG_ACTIVITY_NEW_TASK
-        intent.setClassName(
-            "com.hongb.funcdemo",
-            "com.hongb.funcdemo.lib.thread.InterfaceActivity"
-        )
-        activity.startActivity(intent)
-    }
-
     @Throws(InterruptedException::class)
-    fun mockSendMessage(service: AccessibilityService) {
-//        val viewList = findNodesByViewId(
-//            service,
-//            SEARCH_ID
-//        )
+    fun liveKsMessage(service: AccessibilityService) {
+        // 获取控件内容
         Thread.sleep(500)
-        findViewIdAndPerformClick(
+        val viewList = findNodesByViewId(service, KsResId.LIVE_PAGE.AUDIENCE_COUNT)
+        if (viewList?.isNotEmpty() == true && viewList.size == 1) {
+            Toast.makeText(
+                service.applicationContext,
+                "观看人数：${viewList[0].text}",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        // 填充输入框
+        Thread.sleep(1500)
+        fillInput(
             service,
-            "com.hongb.funcdemo:id/addDataBtn"
+            KsResId.LIVE_PAGE.EDITOR,
+            "欢迎进入直播间"
         )
+        // 发送弹幕消息
         Thread.sleep(2500)
         findViewIdAndPerformClick(
             service,
-            "com.hongb.funcdemo:id/getDataBtn"
+            KsResId.LIVE_PAGE.FINISH_BUTTON
         )
-    }
-
-    @Throws(InterruptedException::class)
-    fun mockKsMessage(service: AccessibilityService) {
-
-        Thread.sleep(500)
-        findViewIdAndGetText(
-            service,
-            KsResId.LIVE_PAGE.AUDIENCE_COUNT
-        )
-//        Thread.sleep(1500)
-//        fillInput(
-//            service,
-//            "com.smile.gifmaker:id/editor",
-//            "谢谢进入直播间"
-//        )
-//        Thread.sleep(1500)
-//        findViewIdAndPerformClick(
-//            service,
-//            "com.smile.gifmaker:id/finish_button"
-//        )
 
 //        Thread.sleep(500)
 //        Log.i("助手", "mock快手开播点击")
@@ -93,6 +82,38 @@ internal object WeChatAccessUtil {
 //            service,
 //            "com.smile.gifmaker:id/search_btn"
 //        )
+    }
+
+    @Throws(InterruptedException::class)
+    fun userProfileKsMessage(service: AccessibilityService) {
+        if (userProfileIsExecuteFinish) {
+            Log.i(TAG, "他人主页的自动化操作已结束")
+            return
+        }
+        // 点击关注
+        Thread.sleep(500)
+        findViewIdAndPerformClick(service, KsResId.USER_PROFILE_PAGE.HEADER_FOLLOW_BUTTON)
+        // 进入发送私信页面
+        Thread.sleep(2500)
+        findViewIdAndPerformClick(service, KsResId.USER_PROFILE_PAGE.SEND_MESSAGE)
+        userProfileIsExecuteFinish = true
+    }
+
+    @Throws(InterruptedException::class)
+    fun imChatKsMessage(service: AccessibilityService) {
+        if (imChatIsExecuteFinish) {
+            Log.i(TAG, "发送私信自动化操作已结束")
+            return
+        }
+        // 点击输入框，输入填入内容
+        Thread.sleep(1500)
+        findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.EDITOR)
+        Thread.sleep(1000)
+        fillInput(service, KsResId.IM_CHAT_PAGE.EDITOR, "你好，你好")
+        // 发送内容
+        Thread.sleep(2500)
+        findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.SEND_BTN)
+        imChatIsExecuteFinish = true
     }
 
     /**

@@ -46,11 +46,13 @@ public interface KsResId {
      */
     interface USER_PROFILE_PAGE {
         // 更多按钮
-        String MORE_BTN = "more_btn";
-        // 粉丝-个人主页-发私信
-        String SEND_MESSAGE_SMALL_ICON = "send_message_small_icon";
+        String MORE_BTN = BASE_LAYOUT_ID + "more_btn";
+        // 粉丝-个人主页-发私信(关注前)
+        String SEND_MESSAGE_SMALL_ICON = BASE_LAYOUT_ID + "send_message_small_icon";
+        // 粉丝-个人主页-发私信(关注后)
+        String SEND_MESSAGE = BASE_LAYOUT_ID + "send_message";
         // 观众关注/回关
-        String HEADER_FOLLOW_BUTTON = "header_follow_button";
+        String HEADER_FOLLOW_BUTTON = BASE_LAYOUT_ID + "header_follow_button";
     }
 
     /**

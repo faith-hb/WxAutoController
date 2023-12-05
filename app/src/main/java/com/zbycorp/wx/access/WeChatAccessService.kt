@@ -4,12 +4,12 @@ import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.zbycorp.wx.contants.KsResId
-import com.zbycorp.wx.utils.WeChatAccessUtil
+import com.zbycorp.wx.utils.KsAccessUtil
+import com.zbycorp.wx.utils.KsAccessUtil.TAG
 
 class WeChatAccessService : AccessibilityService() {
 
     companion object {
-        const val TAG = "主播助手"
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -18,25 +18,19 @@ class WeChatAccessService : AccessibilityService() {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> { // 界面变化事件
                 Log.i(TAG,"className=${event.className}")
                 when (event.className.toString()) {
-                    "com.hongb.funcdemo.lib.thread.InterfaceActivity" -> {
-                        Log.i(TAG, "进入mockApp首页")
-                        WeChatAccessUtil.mockSendMessage(this@WeChatAccessService)
-                    }
-                    "com.yxcorp.gifshow.HomeActivity" -> {
-                        Log.i(TAG, "进入快手首页")
-//                        WeChatAccessUtil.mockKsMessage(this@WeChatAccessService)
-                    }
                     KsResId.LIVE_PAGE -> {
                         Log.i(TAG, "进入快手直播间页面")
-                        WeChatAccessUtil.mockKsMessage(this@WeChatAccessService)
+                        KsAccessUtil.liveKsMessage(this@WeChatAccessService)
                     }
 
                     KsResId.USER_PROFILE_PAGE -> {
                         Log.i(TAG, "进入快手他人主页页面")
+                        KsAccessUtil.userProfileKsMessage(this@WeChatAccessService)
                     }
 
                     KsResId.IM_CHAT_PAGE -> {
-                        Log.i(TAG, "进入快手他人主页页面")
+                        Log.i(TAG, "进入快手会话（发私信）页面")
+                        KsAccessUtil.imChatKsMessage(this@WeChatAccessService)
                     }
                 }
             }

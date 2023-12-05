@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.zbycorp.wx.databinding.ActivityMainBinding
-import com.zbycorp.wx.utils.WeChatAccessUtil
+import com.zbycorp.wx.utils.KsAccessUtil
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,9 +20,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.btnOpenKs.setOnClickListener {
+            KsAccessUtil.openKsApp(this)
+        }
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
-                WeChatAccessUtil.openKsApp(this)
+                KsAccessUtil.openKsApp(this)
             } else {
                 AlertDialog.Builder(this@MainActivity)
                     .setMessage("请在无障碍服务中给该应用授权，否则无法使用该软件")

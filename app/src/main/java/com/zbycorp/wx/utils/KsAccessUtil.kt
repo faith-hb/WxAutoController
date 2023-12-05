@@ -46,6 +46,15 @@ internal object KsAccessUtil {
 
     @Throws(InterruptedException::class)
     fun liveKsMessage(service: AccessibilityService) {
+        // 检查是否有托管弹窗
+        Thread.sleep(3200)
+        val viewEscrowList = findNodesByViewId(service, KsResId.LIVE_PAGE.START_ESCROW)
+        if (viewEscrowList?.isNotEmpty() == true) {
+            Log.i(TAG, "直播间页面-点击了【开始托管】")
+            viewEscrowList[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            // 有托管，下面的流程不执行
+            return
+        }
         // 获取控件内容
         Thread.sleep(500)
         val viewList = findNodesByViewId(service, KsResId.LIVE_PAGE.AUDIENCE_COUNT)
@@ -86,17 +95,41 @@ internal object KsAccessUtil {
 
     @Throws(InterruptedException::class)
     fun userProfileKsMessage(service: AccessibilityService) {
-        if (userProfileIsExecuteFinish) {
-            Log.i(TAG, "他人主页的自动化操作已结束")
-            return
+
+    }
+
+    @Throws(InterruptedException::class)
+    fun liveEscrowKsMessage(service: AccessibilityService) {
+//        if (userProfileIsExecuteFinish) {
+//            Log.i(TAG, "他人主页的自动化操作已结束")
+//            return
+//        }
+        // 点击售卖商品
+        Thread.sleep(1200)
+        val sellViewList = findNodesByViewId(service, KsResId.LIVE_ESCROW_PAGE.SELL_GOODS)
+        if (sellViewList?.isNotEmpty() == true && sellViewList.size > 3) {
+            val nodeInfo = sellViewList[3].parent
+            Log.i(TAG, "托管页面-点击了【售卖商品】 nodeInfo=$nodeInfo")
+            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK)
         }
-        // 点击关注
-        Thread.sleep(500)
-        findViewIdAndPerformClick(service, KsResId.USER_PROFILE_PAGE.HEADER_FOLLOW_BUTTON)
-        // 进入发送私信页面
+        // 点击商品管理
         Thread.sleep(2500)
-        findViewIdAndPerformClick(service, KsResId.USER_PROFILE_PAGE.SEND_MESSAGE)
-        userProfileIsExecuteFinish = true
+        var viewList = findNodesByViewId(service, KsResId.LIVE_ESCROW_PAGE.GOODS_DIALOG)
+        if (viewList?.isNotEmpty() == true) {
+            val rootNodeInfo = viewList[0]
+            Log.i(
+                TAG,
+                "托管页面-点击了【商品管理】viewList=${viewList.size} rootNodeInfo=${rootNodeInfo.childCount}"
+            )
+            if (rootNodeInfo.childCount > 4) {
+                Log.i(TAG, "托管页面-点击了【商品管理】=${rootNodeInfo.getChild(4)}")
+                rootNodeInfo.getChild(4).performAction(AccessibilityNodeInfo.ACTION_CLICK)
+
+                Thread.sleep(1200)
+
+            }
+//
+        }
     }
 
     @Throws(InterruptedException::class)
@@ -169,7 +202,6 @@ internal object KsAccessUtil {
         val viewList = findNodesByViewId(service, viewId)
         if (viewList?.isNotEmpty() == true) {
             for (i in viewList.indices) {
-                //微信7.0.4版本特殊处理
                 val nodeInfo = viewList[i].parent
                 nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             }

@@ -19,6 +19,10 @@ public interface KsResId {
      */
     String LIVE_PAGE = "com.yxcorp.gifshow.detail.PhotoDetailActivity";
     /**
+     * 托管页面
+     */
+    String LIVE_ESCROW_PAGE = "com.kuaishou.live.escrow.basic.activity.LiveEscrowActivity";
+    /**
      * 他人主页
      */
     String USER_PROFILE_PAGE = "com.yxcorp.gifshow.profile.activity.UserProfileActivity";
@@ -31,6 +35,13 @@ public interface KsResId {
      * 直播间页面
      */
     interface LIVE_PAGE {
+        /**
+         * 托管弹窗
+         */
+        // 开始托管
+        String START_ESCROW = BASE_LAYOUT_ID + "live_escrow_entry_start_button";
+        // 托管弹窗关闭
+        String CLOSE_ESCROW = BASE_LAYOUT_ID + "live_escrow_entry_close";
         // 观看人数
         String AUDIENCE_COUNT = BASE_LAYOUT_ID + "live_audience_count_text";
         // 输入框选中控件TextSwitcher
@@ -63,5 +74,12 @@ public interface KsResId {
         String EDITOR = BASE_LAYOUT_ID + "editor";
         // 发送按钮
         String SEND_BTN = BASE_LAYOUT_ID + "send_btn";
+    }
+
+    interface LIVE_ESCROW_PAGE {
+        // 售卖商品
+        String SELL_GOODS = BASE_LAYOUT_ID + "live_bottom_bar_item_icon_image_view";
+        // 商品管理弹窗
+        String GOODS_DIALOG = BASE_LAYOUT_ID + "krn_content_container";
     }
 }

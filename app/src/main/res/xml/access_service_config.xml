@@ -2,10 +2,10 @@
 <!--    android:packageNames="com.tencent.mm"-->
 <!--    android:packageNames="com.hongb.funcdemo"-->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-                       android:accessibilityEventTypes="typeWindowStateChanged|typeNotificationStateChanged|typeViewTextSelectionChanged|typeViewClicked"
-                       android:accessibilityFeedbackType="feedbackGeneric"
-                       android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows"
-                       android:canRetrieveWindowContent="true"
-                       android:description="@string/app_name"
-                       android:packageNames="com.smile.gifmaker"
-                       android:notificationTimeout="100"/>
+    android:accessibilityEventTypes="typeWindowStateChanged|typeNotificationStateChanged|typeViewTextSelectionChanged|typeViewClicked"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/app_name"
+    android:notificationTimeout="100"
+    android:packageNames="com.smile.gifmaker,com.ss.android.ugc.aweme" />

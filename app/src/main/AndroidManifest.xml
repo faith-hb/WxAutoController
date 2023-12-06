@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <service
-                android:name=".access.WeChatAccessService"
+                android:name=".access.AccessService"
                 android:enabled="true"
                 android:exported="true"
                 android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">

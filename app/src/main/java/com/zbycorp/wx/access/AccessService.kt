@@ -8,7 +8,7 @@ import com.zbycorp.wx.utils.KsAccessUtil
 import com.zbycorp.wx.utils.KsAccessUtil.TAG
 import java.lang.Exception
 
-class WeChatAccessService : AccessibilityService() {
+class AccessService : AccessibilityService() {
 
     companion object {
     }
@@ -24,22 +24,22 @@ class WeChatAccessService : AccessibilityService() {
                 when (event.className.toString()) {
                     KsResId.LIVE_PAGE -> {
                         Log.i(TAG, "进入快手直播间页面")
-                        KsAccessUtil.liveKsMessage(this@WeChatAccessService)
+                        KsAccessUtil.liveKsMessage(this@AccessService)
                     }
 
                     KsResId.USER_PROFILE_PAGE -> {
                         Log.i(TAG, "进入快手他人主页页面")
-                        KsAccessUtil.userProfileKsMessage(this@WeChatAccessService)
+                        KsAccessUtil.userProfileKsMessage(this@AccessService)
                     }
 
                     KsResId.IM_CHAT_PAGE -> {
                         Log.i(TAG, "进入快手会话（发私信）页面")
-                        KsAccessUtil.imChatKsMessage(this@WeChatAccessService)
+                        KsAccessUtil.imChatKsMessage(this@AccessService)
                     }
                     KsResId.LIVE_ESCROW_PAGE -> {
                         Log.i(TAG, "进入快手托管页面")
                         try {
-                            KsAccessUtil.liveEscrowKsMessage(this@WeChatAccessService)
+                            KsAccessUtil.liveEscrowKsMessage(this@AccessService)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }

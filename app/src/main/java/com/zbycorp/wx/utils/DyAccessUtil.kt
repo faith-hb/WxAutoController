@@ -10,11 +10,12 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
+import com.zbycorp.wx.contants.DyResId
 import com.zbycorp.wx.contants.KsResId
 import java.util.*
 
-internal object KsAccessUtil {
-    const val TAG = "快手"
+internal object DyAccessUtil {
+    const val TAG = "抖音"
     /**
      * textView
      */
@@ -27,19 +28,19 @@ internal object KsAccessUtil {
     /**
      * 他人主页的自动化是否执行完毕
      */
-    open var userProfileIsExecuteFinish = false
+    private var userProfileIsExecuteFinish = false
 
     /**
      * 私信页面的自动化是否执行完毕
      */
-    open var imChatIsExecuteFinish = false
+    private var imChatIsExecuteFinish = false
 
-    fun openKsApp(activity: Activity) {
+    fun openDyApp(activity: Activity) {
         val intent = Intent()
         intent.flags = FLAG_ACTIVITY_NEW_TASK
         intent.setClassName(
-            KsResId.KS_PACKAGE,
-            "com.yxcorp.gifshow.HomeActivity"
+            DyResId.DY_PACKAGE,
+            "com.ss.android.ugc.aweme.splash.SplashActivity"
         )
         activity.startActivity(intent)
     }

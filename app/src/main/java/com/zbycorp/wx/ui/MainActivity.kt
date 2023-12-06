@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.zbycorp.wx.databinding.ActivityMainBinding
+import com.zbycorp.wx.utils.DyAccessUtil
 import com.zbycorp.wx.utils.KsAccessUtil
 
 class MainActivity : AppCompatActivity() {
@@ -22,6 +23,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnOpenKs.setOnClickListener {
             KsAccessUtil.openKsApp(this)
+        }
+        binding.btnOpenDy.setOnClickListener {
+            DyAccessUtil.openDyApp(this)
         }
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
@@ -58,6 +62,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        KsAccessUtil.userProfileIsExecuteFinish = false
+        KsAccessUtil.imChatIsExecuteFinish = false
     }
 
 }

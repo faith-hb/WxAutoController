@@ -15,6 +15,10 @@ public interface KsResId {
      */
     String BASE_LAYOUT_ID = "com.smile.gifmaker:id/";
     /**
+     * 启动页
+     */
+    String SPLASH_PAGE = "com.yxcorp.gifshow.HomeActivity";
+    /**
      * 直播间页面
      */
     String LIVE_PAGE = "com.yxcorp.gifshow.detail.PhotoDetailActivity";

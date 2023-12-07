@@ -11,25 +11,22 @@ public interface DyResId {
      */
     String DY_PACKAGE = "com.ss.android.ugc.aweme";
     /**
-     * 快手布局ID前缀
+     * 抖音布局ID前缀
      */
     String BASE_LAYOUT_ID = "com.ss.android.ugc.aweme:id/";
     /**
+     * 启动页
+     */
+    String SPLASH_PAGE = "com.ss.android.ugc.aweme.splash.SplashActivity";
+    /**
      * 直播间页面
      */
-    String LIVE_PAGE = "com.yxcorp.gifshow.detail.PhotoDetailActivity";
+    String LIVE_PAGE = "com.ss.android.ugc.aweme.live.LivePlayActivity";
     /**
-     * 托管页面
+     * 直播中控
      */
-    String LIVE_ESCROW_PAGE = "com.kuaishou.live.escrow.basic.activity.LiveEscrowActivity";
-    /**
-     * 他人主页
-     */
-    String USER_PROFILE_PAGE = "com.yxcorp.gifshow.profile.activity.UserProfileActivity";
-    /**
-     * 他人私信页面
-     */
-    String IM_CHAT_PAGE = "com.yxcorp.gifshow.message.imchat.acivity.IMChatActivity";
+    String LIVE_CENTER_CONTROL_PAGE = "com.ss.android.ugc.aweme.bullet.ui.BulletContainerActivity";
+
 
     /**
      * 直播间页面
@@ -53,32 +50,12 @@ public interface DyResId {
     }
 
     /**
-     * 个人主页
+     * 直播中控页面
      */
-    interface USER_PROFILE_PAGE {
-        // 更多按钮
-        String MORE_BTN = BASE_LAYOUT_ID + "more_btn";
-        // 粉丝-个人主页-发私信(关注前)
-        String SEND_MESSAGE_SMALL_ICON = BASE_LAYOUT_ID + "send_message_small_icon";
-        // 粉丝-个人主页-发私信(关注后)
-        String SEND_MESSAGE = BASE_LAYOUT_ID + "send_message";
-        // 观众关注/回关
-        String HEADER_FOLLOW_BUTTON = BASE_LAYOUT_ID + "header_follow_button";
-    }
-
-    /**
-     * 他人私信页面
-     */
-    interface IM_CHAT_PAGE {
-        // 评论输入框
-        String EDITOR = BASE_LAYOUT_ID + "editor";
-        // 发送按钮
-        String SEND_BTN = BASE_LAYOUT_ID + "send_btn";
-    }
-
-    interface LIVE_ESCROW_PAGE {
-        // 售卖商品
-        String SELL_GOODS = BASE_LAYOUT_ID + "live_bottom_bar_item_icon_image_view";
+    interface LIVE_CENTER_CONTROL_PAGE {
+        // 根节点ID
+        String ROOT_ID = BASE_LAYOUT_ID + "bqq";
+        String ROOT_ID_BACKUP = BASE_LAYOUT_ID + "bqx";
         // 商品管理弹窗
         String GOODS_DIALOG = BASE_LAYOUT_ID + "krn_content_container";
     }

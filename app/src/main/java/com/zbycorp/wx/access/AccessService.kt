@@ -3,15 +3,17 @@ package com.zbycorp.wx.access
 import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.webkit.WebView
 import com.zbycorp.wx.contants.DyResId
 import com.zbycorp.wx.contants.KsResId
+import com.zbycorp.wx.utils.DyAccessUtil
 import com.zbycorp.wx.utils.KsAccessUtil
-import com.zbycorp.wx.utils.KsAccessUtil.TAG
 import java.lang.Exception
 
 class AccessService : AccessibilityService() {
 
     companion object {
+        const val TAG = "无障碍服务"
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -37,6 +39,11 @@ class AccessService : AccessibilityService() {
             AccessibilityEvent.TYPE_VIEW_CLICKED -> {
                 var nodeInfo = event.source
 //                Log.i(TAG, "模拟点击(来自监听Service的响应)：${nodeInfo?.text}")
+                if (nodeInfo != null && "android.webkit.WebView" == nodeInfo.className) {
+                    Log.i(TAG, "webview")
+                    val webView = nodeInfo.parent as WebView
+//                    var rootNode = webView.accessibilityNodeProvider.createAccessibilityNodeInfo()
+                }
             }
         }
     }
@@ -69,11 +76,20 @@ class AccessService : AccessibilityService() {
         }
     }
 
-    private fun handleDyEvent(event: AccessibilityEvent){
+    private fun handleDyEvent(event: AccessibilityEvent) {
+        when (event.className.toString()) {
+            DyResId.LIVE_PAGE -> {
+                DyAccessUtil.liveMessage(this@AccessService)
+            }
 
+            DyResId.LIVE_CENTER_CONTROL_PAGE -> {
+                DyAccessUtil.liveCenterControlMessage(this@AccessService)
+//                val viewList = rootNode.fin
+            }
+        }
     }
 
     override fun onInterrupt() {
-
+        Log.w(TAG, "onInterrupt...")
     }
 }

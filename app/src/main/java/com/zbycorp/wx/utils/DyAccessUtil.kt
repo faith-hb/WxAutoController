@@ -477,7 +477,7 @@ internal object DyAccessUtil {
 //                                                                    rect.bottom = tapY1
                                                                     rect.bottom = 1325
                                                                 }
-                                                                mockClkByNode(service,childNodeInfo8, rect)
+                                                                mockClkByNode(service, rect)
                                                             }
                                                         }
                                                     }

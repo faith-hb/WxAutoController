@@ -84,7 +84,9 @@ class AccessService : AccessibilityService() {
 
             DyResId.LIVE_CENTER_CONTROL_PAGE -> {
                 DyAccessUtil.liveCenterControlMessage(this@AccessService)
-//                val viewList = rootNode.fin
+            }
+            else -> {
+                DyAccessUtil.commentIsExecuteFinish = false
             }
         }
     }

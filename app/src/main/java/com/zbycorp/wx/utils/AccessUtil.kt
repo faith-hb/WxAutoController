@@ -1,18 +1,24 @@
 package com.zbycorp.wx.utils
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.GestureDescription
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.graphics.Path
+import android.graphics.Point
+import android.graphics.Rect
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import android.webkit.WebView
 import android.widget.Toast
 import com.zbycorp.wx.contants.DyResId
 import com.zbycorp.wx.contants.KsResId
+import com.zbycorp.wx.utils.AccessUtil.TAG
+import com.zbycorp.wx.utils.AccessUtil.TEXT_VIEW
 import java.util.*
 
 internal object AccessUtil {
@@ -24,9 +30,93 @@ internal object AccessUtil {
      */
     val TEXT_VIEW = "android.widget.TextView"
     /**
+     * buttonView
+     */
+    val BUTTON_VIEW = "android.widget.Button"
+    /**
      * 输入框
      */
     val EDIT_TEXT = "android.widget.EditText"
+    /**
+     * WebView
+     */
+    val WEBVIEW = "android.webkit.WebView"
+
+    /**
+     * Gesture手势实现滚动(Android7+)
+     * 解决滚动距离不可控制问题
+     * @param distanceX 向右滚动为负值 向左滚动为正值
+     * @param distanceY 向下滚动为负值 向上滚动为正值
+     */
+    fun scrollByNode(
+        service: AccessibilityService,
+        nodeInfo: AccessibilityNodeInfo,
+        distanceX: Int = 0,
+        distanceY: Int = 0
+    ): Boolean {
+        val rect = Rect()
+        nodeInfo.getBoundsInScreen(rect)
+        val point = Point((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2)
+        val builder = GestureDescription.Builder()
+        val path = Path()
+        path.moveTo(point.x.toFloat(), point.y.toFloat())
+        path.lineTo(point.x.toFloat() + distanceX, point.y.toFloat() + distanceY)
+//        path.moveTo(point.x.toFloat(), 500f)
+//        path.lineTo(point.x.toFloat() + distanceX, 100f)
+        Log.e(
+            TAG,
+            "moveStartX=${point.x.toFloat()} moveStartY=${point.y.toFloat()} " +
+                    "to " +
+                    "moveEndX=${point.x.toFloat() + distanceX} moveEndY=${point.y.toFloat() + distanceY}"
+        )
+        builder.addStroke(GestureDescription.StrokeDescription(path, 50L, 520L))
+        val gesture = builder.build()
+        return service.dispatchGesture(
+            gesture,
+            object : AccessibilityService.GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription) {
+                    Log.e(TAG, "scroll ok onCompleted")
+                }
+
+                override fun onCancelled(gestureDescription: GestureDescription) {
+                    Log.e(TAG, "scroll ok onCancelled")
+                }
+            },
+            null
+        )
+    }
+
+    fun mockClkByNode(
+        service: AccessibilityService,
+        nodeInfo: AccessibilityNodeInfo,
+        rect: Rect
+    ): Boolean {
+//        nodeInfo.getBoundsInScreen(rect)
+//        val point = Point((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2)
+        val point = Point(rect.right - 10, (rect.top + rect.bottom) / 2)
+        val builder = GestureDescription.Builder()
+        val path = Path()
+        path.moveTo(point.x.toFloat(), point.y.toFloat())
+        Log.e(
+            TAG,
+            "moveStartX=${point.x.toFloat()} moveStartY=${point.y.toFloat()}"
+        )
+        builder.addStroke(GestureDescription.StrokeDescription(path, 50L, 520L))
+        val gesture = builder.build()
+        return service.dispatchGesture(
+            gesture,
+            object : AccessibilityService.GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription) {
+                    Log.e(TAG, "click ok onCompleted")
+                }
+
+                override fun onCancelled(gestureDescription: GestureDescription) {
+                    Log.e(TAG, "click ok onCancelled")
+                }
+            },
+            null
+        )
+    }
 
     /**
      * 填充EditText
@@ -47,6 +137,20 @@ internal object AccessUtil {
                     accessibilityNodeInfo.performAction(AccessibilityNodeInfo.ACTION_PASTE)
                 }
             }
+        }
+    }
+
+    fun fillInput(
+        service: AccessibilityService,
+        accessibilityNodeInfo: AccessibilityNodeInfo,
+        content: String?
+    ) {
+        if (accessibilityNodeInfo.className == EDIT_TEXT && accessibilityNodeInfo.isEnabled) {
+            val clip = ClipData.newPlainText("label", content)
+            val clipboardManager =
+                service.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboardManager.primaryClip = clip
+            accessibilityNodeInfo.performAction(AccessibilityNodeInfo.ACTION_PASTE)
         }
     }
 

@@ -6,6 +6,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.webkit.WebView
 import com.zbycorp.wx.contants.DyResId
 import com.zbycorp.wx.contants.KsResId
+import com.zbycorp.wx.utils.AccessUtil
 import com.zbycorp.wx.utils.DyAccessUtil
 import com.zbycorp.wx.utils.KsAccessUtil
 import java.lang.Exception
@@ -50,6 +51,9 @@ class AccessService : AccessibilityService() {
 
     private fun handleKsEvent(event: AccessibilityEvent) {
         when (event.className.toString()) {
+            KsResId.SPLASH_PAGE -> {
+                AccessUtil.updateTips("来到快手首页")
+            }
             KsResId.LIVE_PAGE -> {
                 Log.w(TAG, "进入快手直播间页面")
                 KsAccessUtil.liveKsMessage(this@AccessService)

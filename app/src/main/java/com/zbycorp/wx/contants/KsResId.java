@@ -36,6 +36,16 @@ public interface KsResId {
     String IM_CHAT_PAGE = "com.yxcorp.gifshow.message.imchat.acivity.IMChatActivity";
 
     /**
+     * 首页
+     */
+    interface HOME_PAGE {
+        // 首页开播
+        String SHOOT_CONTAINER = BASE_LAYOUT_ID + "shoot_container";
+        // 首页搜索
+        String SEARCH_BTN = BASE_LAYOUT_ID + "search_btn";
+    }
+
+    /**
      * 直播间页面
      */
     interface LIVE_PAGE {

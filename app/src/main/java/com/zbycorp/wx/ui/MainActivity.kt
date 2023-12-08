@@ -8,7 +8,11 @@ import android.provider.Settings.SettingNotFoundException
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.lzf.easyfloat.EasyFloat
+import com.lzf.easyfloat.enums.ShowPattern
+import com.zbycorp.wx.R
 import com.zbycorp.wx.databinding.ActivityMainBinding
+import com.zbycorp.wx.utils.AccessUtil
 import com.zbycorp.wx.utils.DyAccessUtil
 import com.zbycorp.wx.utils.KsAccessUtil
 
@@ -20,8 +24,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+//        EasyFloat.with(this).setShowPattern(ShowPattern.ALL_TIME).setLayout(R.layout.pop_window)
+//            .show()
         binding.btnOpenKs.setOnClickListener {
+            AccessUtil.updateTips("进入快手APP")
             KsAccessUtil.openKsApp(this)
         }
         binding.btnOpenDy.setOnClickListener {
@@ -29,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
-                KsAccessUtil.openKsApp(this)
+
             } else {
                 AlertDialog.Builder(this@MainActivity)
                     .setMessage("请在无障碍服务中给该应用授权，否则无法使用该软件")
@@ -40,6 +46,15 @@ class MainActivity : AppCompatActivity() {
                     .setNegativeButton("取消") { _, _ -> onBackPressed() }
                     .show()
             }
+        }
+
+        AccessUtil.showWindowTips(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isAccessibilitySettingsOn(this)) {
+            AccessUtil.updateTips("Demo演示操作准备中\n无障碍服务已开启")
         }
     }
 

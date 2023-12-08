@@ -7,16 +7,18 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
 import com.zbycorp.wx.contants.KsResId
+import com.zbycorp.wx.utils.AccessUtil.TEXT_VIEW
 import com.zbycorp.wx.utils.AccessUtil.fillInput
+import com.zbycorp.wx.utils.AccessUtil.findNodesByText
 import com.zbycorp.wx.utils.AccessUtil.findNodesByViewId
 import com.zbycorp.wx.utils.AccessUtil.findViewIdAndPerformClick
-import com.zbycorp.wx.utils.AccessUtil.showToast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -33,6 +35,30 @@ internal object KsAccessUtil {
      */
     open var imChatIsExecuteFinish = false
 
+    /**
+     * 直播间页面
+     */
+    // 开始托管点击是否执行完毕
+    open var startEscrowIsFinish = false
+    // 是否发送完弹幕
+    open var sendDmIsFinish = false
+
+    /**
+     * 托管页
+     */
+    // 售卖商品点击执行是否完毕
+    open var sellGoodsIsFinish = false
+    // 商品管理点击执行是否完毕
+    open var goodsManagerIsFinish = false
+    // 开始讲解点击执行是否完毕
+    open var startExplainIsFinish = false
+
+    // 关注是否执行完毕
+    open var followIsExecuteFinish = false
+    // 进入私信页面是否执行完毕
+    open var enterMessageIsExecuteFinish = false
+
+
     fun openKsApp(activity: Activity) {
         val intent = Intent()
         intent.flags = FLAG_ACTIVITY_NEW_TASK
@@ -43,76 +69,178 @@ internal object KsAccessUtil {
         activity.startActivity(intent)
     }
 
-    @Throws(InterruptedException::class)
     fun liveKsMessage(service: AccessibilityService) {
-        // 检查是否有托管弹窗
-        Thread.sleep(3200)
-        val viewEscrowList = findNodesByViewId(service, KsResId.LIVE_PAGE.START_ESCROW)
-        if (viewEscrowList?.isNotEmpty() == true) {
-            Log.i(TAG, "直播间页面-点击了【开始托管】")
-            viewEscrowList[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            // 有托管，下面的流程不执行
-            return
+        if (!startEscrowIsFinish) {
+            AccessUtil.updateTips("进入直播间：准备演示商品自动化上架")
         }
-        // 获取控件内容
-        Thread.sleep(500)
-        val viewList = findNodesByViewId(service, KsResId.LIVE_PAGE.AUDIENCE_COUNT)
-        if (viewList?.isNotEmpty() == true && viewList.size == 1) {
-            Toast.makeText(
-                service.applicationContext,
-                "观看人数：${viewList[0].text}",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-        // 填充输入框
-        Thread.sleep(1500)
-        fillInput(
-            service,
-            KsResId.LIVE_PAGE.EDITOR,
-            "欢迎进入直播间"
-        )
-        // 发送弹幕消息
-        Thread.sleep(2500)
-        findViewIdAndPerformClick(
-            service,
-            KsResId.LIVE_PAGE.FINISH_BUTTON
-        )
+        GlobalScope.launch(Dispatchers.Main) {
+            runBlocking {
+                coroutineScope {
+                    val startEscrow =
+                        withContext(Dispatchers.Default) {
+                            delay(3200)
+                            "模拟点击：开始托管"
+                        }
+                    // 托管
+                    if (!startEscrowIsFinish) {
+                        val viewEscrowList =
+                            findNodesByViewId(service, KsResId.LIVE_PAGE.START_ESCROW)
+                        // 检查是否有托管弹窗
+                        if (viewEscrowList?.isNotEmpty() == true) {
+                            Log.i(TAG, "直播间页面-点击了【开始托管】result=$startEscrow")
+                            AccessUtil.updateTips(startEscrow)
+                            viewEscrowList[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            startEscrowIsFinish = true
+                            // 有托管，下面的流程不执行
+                            return@coroutineScope
+                        }
+                    }
 
-//        Thread.sleep(500)
-//        Log.i("助手", "mock快手开播点击")
-//        findViewIdAndPerformClick(
-//            service,
-//            "com.smile.gifmaker:id/shoot_container"
-//        )
-//        Thread.sleep(2500)
-//        Log.i("助手", "mock快手搜索点击")
-//        findViewIdAndPerformClick(
-//            service,
-//            "com.smile.gifmaker:id/search_btn"
-//        )
+                    if (sendDmIsFinish) {
+                        Log.i(TAG, "直播间页面-弹幕发送过了，不要再继续发送")
+                        return@coroutineScope
+                    }
+                    // 编辑框内容写入
+                    findViewIdAndPerformClick(service,KsResId.LIVE_PAGE.COMMENT_TEXT_VIEW)
+                    Log.i(TAG, "直播间页面-准备发送弹幕")
+                    val resultDm =
+                        withContext(Dispatchers.Default) {
+                            delay(2500)
+                            "欢迎进入直播间"
+                        }
+                    Log.i(TAG, "直播间页面-发送弹幕=$resultDm")
+                    fillInput(
+                        service,
+                        KsResId.LIVE_PAGE.EDITOR,
+                        resultDm
+                    )
+
+                    // 发送弹幕
+                    val sendDm =
+                        withContext(Dispatchers.Default) {
+                            delay(1200)
+                            "模拟点击：发送弹幕"
+                        }
+                    sendDmIsFinish = true
+                    AccessUtil.updateTips(sendDm)
+                    findViewIdAndPerformClick(
+                        service,
+                        KsResId.LIVE_PAGE.FINISH_BUTTON
+                    )
+                }
+            }
+        }
+    }
+
+    fun liveEscrowKsMessage(service: AccessibilityService) {
+        Log.i(TAG, "liveEscrowKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<<<<<<")
+        GlobalScope.launch(Dispatchers.Main) {
+            if (sellGoodsIsFinish) return@launch
+            val sellGoods = withContext(Dispatchers.Default) {
+                delay(1600)
+                "模拟点击：售卖商品"
+            }
+            AccessUtil.updateTips(sellGoods)
+            val sellViewList = findNodesByText(service, "售卖商品")
+            Log.i(
+                TAG,
+                "节点：nodeCount=${sellViewList?.size} 售卖商品 currIsMainThread=${Looper.getMainLooper().isCurrentThread}"
+            )
+            if (sellViewList?.isNotEmpty() == true) {
+                val node = sellViewList[0]
+                if (TEXT_VIEW == node.className.toString() && "售卖商品" == node.text.toString()) {
+                    Log.i(TAG, "模拟点击：售卖商品")
+                    node.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    sellGoodsIsFinish = true
+                }
+            }
+
+            if (goodsManagerIsFinish) return@launch
+            withContext(Dispatchers.Default) {
+                delay(2200)
+            }
+            val viewList = findNodesByViewId(service, KsResId.LIVE_ESCROW_PAGE.GOODS_DIALOG)
+            Log.i(TAG, "节点：nodeCount=${viewList?.size}")
+            if (viewList?.isNotEmpty() == true) {
+                for (index in viewList.indices) {
+                    val nodeInfo1 = viewList[index]
+//                            Log.i(TAG,"一级递归：childCount=${nodeInfo1.childCount} nodeInfo1=$nodeInfo1")
+                    for (index2 in 0 until nodeInfo1.childCount) {
+                        val nodeInfo2 = nodeInfo1.getChild(index2)
+//                                Log.i(TAG,"二级递归：childCount=${nodeInfo2.childCount} nodeInfo2=$nodeInfo2")
+                        for (index3 in 0 until nodeInfo2.childCount) {
+                            val nodeInfo3 = nodeInfo2.getChild(index3)
+//                                    Log.i(TAG,"三级递归：childCount=${nodeInfo3.childCount} index=$index3 clsName=${nodeInfo3.className} text=${nodeInfo3.text}")
+//                                    if (TEXT_VIEW == nodeInfo3.className.toString()) {
+//                                        if ("商品管理" == nodeInfo3.text.toString() && !goodsManagerIsFinish) {
+//                                            Log.i(TAG, "三级递归：模拟点击【商品管理】")
+//                                            nodeInfo3.parent.parent.performAction(
+//                                                AccessibilityNodeInfo.ACTION_CLICK
+//                                            )
+//                                            goodsManagerIsFinish = true
+//                                        }
+//                                    }
+                            for (index4 in 0 until nodeInfo3.childCount) {
+                                val nodeInfo4 = nodeInfo3.getChild(index4) ?: continue
+//                                        Log.i(
+//                                            TAG,
+//                                            "四级递归：childCount=${nodeInfo4.childCount} index=$index4 clsName=${nodeInfo4.className} text=${nodeInfo4.text}"
+//                                        )
+                                if (TEXT_VIEW == nodeInfo4.className.toString()) {
+                                    if ("开始讲解" == nodeInfo4.text.toString() && !startExplainIsFinish) {
+                                        val oneSay = withContext(Dispatchers.Default) {
+                                            delay(1200)
+                                            "模拟点击：开始讲解（第一个商品）"
+                                        }
+                                        AccessUtil.updateTips(oneSay)
+                                        Log.i(
+                                            TAG,
+                                            "四级递归：模拟点击【开始讲解】index=$index4 parent=${nodeInfo4.parent.className}"
+                                        )
+                                        nodeInfo4.parent.performAction(
+                                            AccessibilityNodeInfo.ACTION_CLICK
+                                        )
+                                        startExplainIsFinish = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            val endResult = withContext(Dispatchers.Default) {
+                delay(2300)
+                "商品上架流程结束，用户端效果可见"
+            }
+            AccessUtil.updateTips(endResult)
+        }
+
+        Log.i(TAG, "liveEscrowKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<<<<<<")
     }
 
     fun userProfileKsMessage(service: AccessibilityService) {
+        if (!followIsExecuteFinish) {
+            AccessUtil.updateTips("进入他人主页：演示自动化关注和发送私信")
+        }
         Log.i(TAG, "userProfileKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<<<<<<")
-        showToast(service, "他人主页：演示自动关注和打开私信页面")
-
         runBlocking {
             coroutineScope {
                 async {
-//                    withContext(Dispatchers.Main) {
-//
-//                    }
+                    if (followIsExecuteFinish) return@async
+                    AccessUtil.updateTips("模拟点击：关注")
                     delay(1200)
                     Log.i(TAG, "模拟点击：关注")
                     findViewIdAndPerformClick(
                         service,
                         KsResId.USER_PROFILE_PAGE.HEADER_FOLLOW_BUTTON
                     )
+                    followIsExecuteFinish = true
                 }
             }
             coroutineScope {
                 async {
-                    delay(1200)
+                    if (enterMessageIsExecuteFinish) return@async
+                    delay(2200)
                     Log.i(TAG, "模拟点击：打开私信页面")
                     var viewList = findNodesByViewId(
                         service,
@@ -124,6 +252,7 @@ internal object KsAccessUtil {
                     }
                     if (viewList?.isNotEmpty() == true) {
                         viewList[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        enterMessageIsExecuteFinish = true
                     }
                 }
             }
@@ -134,54 +263,40 @@ internal object KsAccessUtil {
         )
     }
 
-    @Throws(InterruptedException::class)
-    fun liveEscrowKsMessage(service: AccessibilityService) {
-//        if (userProfileIsExecuteFinish) {
-//            Log.i(TAG, "他人主页的自动化操作已结束")
-//            return
-//        }
-        // 点击售卖商品
-        Thread.sleep(1200)
-        val sellViewList = findNodesByViewId(service, KsResId.LIVE_ESCROW_PAGE.SELL_GOODS)
-        if (sellViewList?.isNotEmpty() == true && sellViewList.size > 3) {
-            val nodeInfo = sellViewList[3].parent
-            Log.i(TAG, "托管页面-点击了【售卖商品】 nodeInfo=$nodeInfo")
-            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-        }
-        // 点击商品管理
-        Thread.sleep(2500)
-        var viewList = findNodesByViewId(service, KsResId.LIVE_ESCROW_PAGE.GOODS_DIALOG)
-        if (viewList?.isNotEmpty() == true) {
-            val rootNodeInfo = viewList[0]
-            Log.i(
-                TAG,
-                "托管页面-点击了【商品管理】viewList=${viewList.size} rootNodeInfo=${rootNodeInfo.childCount}"
-            )
-            if (rootNodeInfo.childCount > 4) {
-                Log.i(TAG, "托管页面-点击了【商品管理】=${rootNodeInfo.getChild(4)}")
-                rootNodeInfo.getChild(4).performAction(AccessibilityNodeInfo.ACTION_CLICK)
-
-                Thread.sleep(1200)
-
-            }
-//
-        }
-    }
-
-    @Throws(InterruptedException::class)
     fun imChatKsMessage(service: AccessibilityService) {
-        if (imChatIsExecuteFinish) {
-            Log.i(TAG, "发送私信自动化操作已结束")
-            return
+        if (imChatIsExecuteFinish) return
+        Log.i(
+            TAG,
+            "imChatKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<<<<<<<<<"
+        )
+        runBlocking {
+            coroutineScope {
+                async {
+                    AccessUtil.updateTips("模拟点击：发送私信")
+                    delay(1500)
+                    Log.i(TAG, "模拟点击：输入框")
+                    // 点击编辑框
+                    findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.EDITOR)
+                    delay(1200)
+                    Log.i(TAG, "模拟输入：私信内容")
+                    // 往编辑框填写内容
+                    fillInput(service, KsResId.IM_CHAT_PAGE.EDITOR, "你好，你好")
+                }
+            }
+            coroutineScope {
+                async {
+                    delay(2500)
+                    Log.i(TAG, "模拟点击：发送私信")
+                    // 点击发送内容
+                    findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.SEND_BTN)
+                }
+            }
+            imChatIsExecuteFinish = true
+            AccessUtil.updateTips("关注 & 发私信功能演示结束")
         }
-        // 点击输入框，输入填入内容
-        Thread.sleep(1500)
-        findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.EDITOR)
-        Thread.sleep(1000)
-        fillInput(service, KsResId.IM_CHAT_PAGE.EDITOR, "你好，你好")
-        // 发送内容
-        Thread.sleep(2500)
-        findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.SEND_BTN)
-        imChatIsExecuteFinish = true
+        Log.i(
+            TAG,
+            "imChatKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<<<<<<<<<"
+        )
     }
 }

@@ -2,25 +2,28 @@ package com.zbycorp.wx.utils
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.graphics.Path
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.accessibility.AccessibilityNodeInfo
-import android.webkit.WebView
+import android.widget.TextView
 import android.widget.Toast
-import com.zbycorp.wx.contants.DyResId
-import com.zbycorp.wx.contants.KsResId
-import com.zbycorp.wx.utils.AccessUtil.TAG
-import com.zbycorp.wx.utils.AccessUtil.TEXT_VIEW
-import java.util.*
+import com.lzf.easyfloat.EasyFloat
+import com.lzf.easyfloat.enums.ShowPattern
+import com.zbycorp.wx.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
+@SuppressLint("StaticFieldLeak")
 internal object AccessUtil {
 
     const val TAG = "AccessUtil"
@@ -243,5 +246,28 @@ internal object AccessUtil {
      */
     fun findNodesByText(service: AccessibilityService, text: String?): List<AccessibilityNodeInfo>? {
         return if (service.rootInActiveWindow != null) service.rootInActiveWindow.findAccessibilityNodeInfosByText(text) else null
+    }
+
+    var mTargetTv: TextView? = null
+    fun showWindowTips(context: Context) {
+        var layout = LayoutInflater.from(context).inflate(R.layout.pop_window, null)
+        mTargetTv = layout.findViewById(R.id.tv_tips)
+        EasyFloat.with(context).setShowPattern(ShowPattern.ALL_TIME).setLayout(layout)
+            .setGravity(Gravity.BOTTOM,0,-190)
+            .setMatchParent(widthMatch = true)
+            .show()
+    }
+
+    fun updateTips(tips: String) {
+//        mTargetTv?.apply {
+//            post {
+//                Log.e(TAG,"tips内容：$tips")
+//                text = tips
+//            }
+//        }
+//        GlobalScope.launch(Dispatchers.Main) {
+            Log.e(TAG,"tips内容：$tips")
+            mTargetTv?.text = tips
+//        }
     }
 }

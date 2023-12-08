@@ -42,6 +42,10 @@ internal object AccessUtil {
      */
     val WEBVIEW = "android.webkit.WebView"
 
+    fun showToast(context: Context, msg: String) {
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
     /**
      * Gesture手势实现滚动(Android7+)
      * 解决滚动距离不可控制问题

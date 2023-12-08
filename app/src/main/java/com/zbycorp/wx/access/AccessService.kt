@@ -51,22 +51,22 @@ class AccessService : AccessibilityService() {
     private fun handleKsEvent(event: AccessibilityEvent) {
         when (event.className.toString()) {
             KsResId.LIVE_PAGE -> {
-                Log.i(TAG, "进入快手直播间页面")
+                Log.w(TAG, "进入快手直播间页面")
                 KsAccessUtil.liveKsMessage(this@AccessService)
             }
 
             KsResId.USER_PROFILE_PAGE -> {
-                Log.i(TAG, "进入快手他人主页页面")
+                Log.w(TAG, "进入快手他人主页页面")
                 KsAccessUtil.userProfileKsMessage(this@AccessService)
             }
 
             KsResId.IM_CHAT_PAGE -> {
-                Log.i(TAG, "进入快手会话（发私信）页面")
+                Log.w(TAG, "进入快手会话（发私信）页面")
                 KsAccessUtil.imChatKsMessage(this@AccessService)
             }
 
             KsResId.LIVE_ESCROW_PAGE -> {
-                Log.i(TAG, "进入快手托管页面")
+                Log.w(TAG, "进入快手托管页面")
                 try {
                     KsAccessUtil.liveEscrowKsMessage(this@AccessService)
                 } catch (e: Exception) {

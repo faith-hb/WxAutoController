@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.app.Activity
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
@@ -11,6 +12,13 @@ import com.zbycorp.wx.contants.KsResId
 import com.zbycorp.wx.utils.AccessUtil.fillInput
 import com.zbycorp.wx.utils.AccessUtil.findNodesByViewId
 import com.zbycorp.wx.utils.AccessUtil.findViewIdAndPerformClick
+import com.zbycorp.wx.utils.AccessUtil.showToast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.*
 
 internal object KsAccessUtil {
@@ -84,9 +92,46 @@ internal object KsAccessUtil {
 //        )
     }
 
-    @Throws(InterruptedException::class)
     fun userProfileKsMessage(service: AccessibilityService) {
+        Log.i(TAG, "userProfileKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<<<<<<")
+        showToast(service, "他人主页：演示自动关注和打开私信页面")
 
+        runBlocking {
+            coroutineScope {
+                async {
+//                    withContext(Dispatchers.Main) {
+//
+//                    }
+                    delay(1200)
+                    Log.i(TAG, "模拟点击：关注")
+                    findViewIdAndPerformClick(
+                        service,
+                        KsResId.USER_PROFILE_PAGE.HEADER_FOLLOW_BUTTON
+                    )
+                }
+            }
+            coroutineScope {
+                async {
+                    delay(1200)
+                    Log.i(TAG, "模拟点击：打开私信页面")
+                    var viewList = findNodesByViewId(
+                        service,
+                        KsResId.USER_PROFILE_PAGE.SEND_MESSAGE_SMALL_ICON
+                    )
+                    if (viewList.isNullOrEmpty()) {
+                        viewList =
+                            findNodesByViewId(service, KsResId.USER_PROFILE_PAGE.SEND_MESSAGE)
+                    }
+                    if (viewList?.isNotEmpty() == true) {
+                        viewList[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    }
+                }
+            }
+        }
+        Log.i(
+            TAG,
+            "userProfileKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<<<<<<<<<"
+        )
     }
 
     @Throws(InterruptedException::class)

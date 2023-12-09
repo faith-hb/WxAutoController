@@ -22,10 +22,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.i("MainActivity1", "onCreate...")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-//        EasyFloat.with(this).setShowPattern(ShowPattern.ALL_TIME).setLayout(R.layout.pop_window)
-//            .show()
         binding.btnOpenKs.setOnClickListener {
             AccessUtil.updateTips("进入快手APP")
             KsAccessUtil.openKsApp(this)
@@ -35,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
-
+                AccessUtil.updateTips("服务已开启，可以打开抖音｜快手进行体验")
             } else {
                 AlertDialog.Builder(this@MainActivity)
                     .setMessage("请在无障碍服务中给该应用授权，否则无法使用该软件")
@@ -53,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        AccessUtil.updateTips("Demo演示操作准备中\n请先开启无障碍服务")
         if (isAccessibilitySettingsOn(this)) {
             AccessUtil.updateTips("Demo演示操作准备中\n无障碍服务已开启")
         }
@@ -79,10 +79,17 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        Log.i("MainActivity1", "onDestroy...")
         KsAccessUtil.userProfileIsExecuteFinish = false
         KsAccessUtil.imChatIsExecuteFinish = false
+        AccessUtil.dismissWindowTips()
     }
 
 }

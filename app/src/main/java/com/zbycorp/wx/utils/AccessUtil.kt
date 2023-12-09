@@ -3,6 +3,7 @@ package com.zbycorp.wx.utils
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -16,6 +17,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import android.widget.Toast
 import com.lzf.easyfloat.EasyFloat
+import com.lzf.easyfloat.anim.DefaultAnimator
 import com.lzf.easyfloat.enums.ShowPattern
 import com.zbycorp.wx.R
 import kotlinx.coroutines.Dispatchers
@@ -249,13 +251,17 @@ internal object AccessUtil {
     }
 
     var mTargetTv: TextView? = null
-    fun showWindowTips(context: Context) {
+    fun showWindowTips(context: Activity) {
         var layout = LayoutInflater.from(context).inflate(R.layout.pop_window, null)
         mTargetTv = layout.findViewById(R.id.tv_tips)
         EasyFloat.with(context).setShowPattern(ShowPattern.ALL_TIME).setLayout(layout)
             .setGravity(Gravity.BOTTOM,0,-190)
             .setMatchParent(widthMatch = true)
             .show()
+    }
+
+    fun dismissWindowTips() {
+        EasyFloat.dismiss(force = true)
     }
 
     fun updateTips(tips: String) {

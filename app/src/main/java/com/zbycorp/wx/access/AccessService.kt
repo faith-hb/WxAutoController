@@ -98,4 +98,9 @@ class AccessService : AccessibilityService() {
     override fun onInterrupt() {
         Log.w(TAG, "onInterrupt...")
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+    }
 }

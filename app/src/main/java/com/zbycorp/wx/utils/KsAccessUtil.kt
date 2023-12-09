@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Looper
+import android.provider.Settings.Global
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import com.zbycorp.wx.contants.KsResId
@@ -223,40 +224,34 @@ internal object KsAccessUtil {
             AccessUtil.updateTips("进入他人主页：演示自动化关注和发送私信")
         }
         Log.i(TAG, "userProfileKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<<<<<<")
-        runBlocking {
-            coroutineScope {
-                async {
-                    if (followIsExecuteFinish) return@async
-                    AccessUtil.updateTips("模拟点击：关注")
-                    delay(1200)
-                    Log.i(TAG, "模拟点击：关注")
-                    findViewIdAndPerformClick(
-                        service,
-                        KsResId.USER_PROFILE_PAGE.HEADER_FOLLOW_BUTTON
-                    )
-                    followIsExecuteFinish = true
-                }
+        GlobalScope.launch(Dispatchers.Main) {
+            if (followIsExecuteFinish) return@launch
+            delay(2200)
+            AccessUtil.updateTips("模拟点击：关注")
+            Log.i(TAG, "模拟点击：关注")
+            findViewIdAndPerformClick(
+                service,
+                KsResId.USER_PROFILE_PAGE.HEADER_FOLLOW_BUTTON
+            )
+            followIsExecuteFinish = true
+
+            if (enterMessageIsExecuteFinish) return@launch
+            delay(2200)
+            Log.i(TAG, "模拟点击：打开私信页面")
+            var viewList = findNodesByViewId(
+                service,
+                KsResId.USER_PROFILE_PAGE.SEND_MESSAGE_SMALL_ICON
+            )
+            if (viewList.isNullOrEmpty()) {
+                viewList =
+                    findNodesByViewId(service, KsResId.USER_PROFILE_PAGE.SEND_MESSAGE)
             }
-            coroutineScope {
-                async {
-                    if (enterMessageIsExecuteFinish) return@async
-                    delay(2200)
-                    Log.i(TAG, "模拟点击：打开私信页面")
-                    var viewList = findNodesByViewId(
-                        service,
-                        KsResId.USER_PROFILE_PAGE.SEND_MESSAGE_SMALL_ICON
-                    )
-                    if (viewList.isNullOrEmpty()) {
-                        viewList =
-                            findNodesByViewId(service, KsResId.USER_PROFILE_PAGE.SEND_MESSAGE)
-                    }
-                    if (viewList?.isNotEmpty() == true) {
-                        viewList[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                        enterMessageIsExecuteFinish = true
-                    }
-                }
+            if (viewList?.isNotEmpty() == true) {
+                viewList[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                enterMessageIsExecuteFinish = true
             }
         }
+
         Log.i(
             TAG,
             "userProfileKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -269,30 +264,29 @@ internal object KsAccessUtil {
             TAG,
             "imChatKsMessage->>>>>>>>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<<<<<<<<<"
         )
-        runBlocking {
-            coroutineScope {
-                async {
-                    AccessUtil.updateTips("模拟点击：发送私信")
-                    delay(1500)
-                    Log.i(TAG, "模拟点击：输入框")
-                    // 点击编辑框
-                    findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.EDITOR)
-                    delay(1200)
-                    Log.i(TAG, "模拟输入：私信内容")
-                    // 往编辑框填写内容
-                    fillInput(service, KsResId.IM_CHAT_PAGE.EDITOR, "你好，你好")
-                }
+        AccessUtil.updateTips( "进入私信页面")
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(3200)
+            AccessUtil.updateTips("自动化填写文本框内容")
+            Log.i(TAG, "模拟点击：输入框")
+            // 点击编辑框
+            findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.EDITOR)
+            delay(1200)
+            Log.i(TAG, "模拟输入：私信内容")
+            // 往编辑框填写内容
+            fillInput(service, KsResId.IM_CHAT_PAGE.EDITOR, "你好，你好")
+
+            val mockSendSx = withContext(Dispatchers.Default) {
+                delay(2500)
+                "模拟点击：发送私信"
             }
-            coroutineScope {
-                async {
-                    delay(2500)
-                    Log.i(TAG, "模拟点击：发送私信")
-                    // 点击发送内容
-                    findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.SEND_BTN)
-                }
-            }
+            AccessUtil.updateTips(mockSendSx)
+            Log.i(TAG, "模拟点击：发送私信")
+            // 点击发送内容
+            findViewIdAndPerformClick(service, KsResId.IM_CHAT_PAGE.SEND_BTN)
             imChatIsExecuteFinish = true
-            AccessUtil.updateTips("关注 & 发私信功能演示结束")
+            delay(3200)
+            AccessUtil.updateTips("关注 & 发私信自动化演示结束")
         }
         Log.i(
             TAG,

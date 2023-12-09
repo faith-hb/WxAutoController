@@ -87,6 +87,7 @@ class AccessService : AccessibilityService() {
             }
 
             DyResId.LIVE_CENTER_CONTROL_PAGE -> {
+                AccessUtil.updateTips("进入直播中控页面")
                 DyAccessUtil.liveCenterControlMessage(this@AccessService)
             }
             else -> {

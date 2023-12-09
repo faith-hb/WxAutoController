@@ -17,13 +17,9 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import android.widget.Toast
 import com.lzf.easyfloat.EasyFloat
-import com.lzf.easyfloat.anim.DefaultAnimator
 import com.lzf.easyfloat.enums.ShowPattern
 import com.zbycorp.wx.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.zbycorp.wx.ui.RectView
 
 @SuppressLint("StaticFieldLeak")
 internal object AccessUtil {
@@ -99,22 +95,26 @@ internal object AccessUtil {
         service: AccessibilityService,
         rect: Rect
     ): Boolean {
-//        val point = Point((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2)
-        val point = Point(rect.right - 10, (rect.top + rect.bottom) / 2)
+        val point = Point((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2)
+//        val point = Point(rect.right - 10, (rect.top + rect.bottom) / 2)
         val builder = GestureDescription.Builder()
         val path = Path()
-        path.moveTo(point.x.toFloat(), point.y.toFloat())
+        val pointX = point.x.toFloat()
+        val pointY = point.y.toFloat()
+//        val pointY = 1686f
+        path.moveTo(pointX, pointY)
+//        path.lineTo(pointX, pointY)
         Log.e(
             TAG,
             "moveStartX=${point.x.toFloat()} moveStartY=${point.y.toFloat()}"
         )
-        builder.addStroke(GestureDescription.StrokeDescription(path, 50L, 520L))
+        builder.addStroke(GestureDescription.StrokeDescription(path, 50L, 320L))
         val gesture = builder.build()
         return service.dispatchGesture(
             gesture,
             object : AccessibilityService.GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
-                    Log.e(TAG, "click ok onCompleted")
+                    Log.e(TAG, "click ok onCompleted pointX=$pointX pointY=$pointY")
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription) {
@@ -275,5 +275,29 @@ internal object AccessUtil {
             Log.e(TAG,"tips内容：$tips")
             mTargetTv?.text = tips
 //        }
+    }
+
+    var mRectView: RectView? = null
+    var mRectBuilder: EasyFloat.Builder? = null
+    fun showRectCheck(context: Context, rect: Rect, x: Int, y: Int) {
+        var layout = LayoutInflater.from(context).inflate(R.layout.rect_view, null)
+        mRectView = layout.findViewById(R.id.rv_check)
+        mRectView?.setRect(rect)
+        mRectBuilder = EasyFloat.with(context)
+        mRectBuilder?.apply {
+            setTag("rectView").setShowPattern(ShowPattern.ALL_TIME)
+//                .setLocation(x, y)
+                .setLayout(layout)
+                .setMatchParent(widthMatch = true)
+                .show()
+        }
+    }
+
+    fun dismissWindowRect() {
+        EasyFloat.dismiss(tag = "rectView",force = true)
+    }
+
+    fun updateRect(rect: Rect){
+        mRectView?.setRect(rect)
     }
 }

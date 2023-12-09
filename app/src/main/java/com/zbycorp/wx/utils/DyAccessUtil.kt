@@ -71,33 +71,21 @@ internal object DyAccessUtil {
         if (viewList?.isNotEmpty() == true) {
             val nodeInfo = viewList[0]
             Log.i(TAG, "childCount=${nodeInfo.childCount} clsName=${nodeInfo.className}")
-            if (nodeInfo.childCount > 0 && WEBVIEW == nodeInfo.getChild(0).className.toString()) {
-                // 向上滑动
-//                CoroutineScope(Dispatchers.Main).launch {
-                    val isScroll = scrollByNode(service, nodeInfo.getChild(0), 0, -340)
-                    Log.i(TAG, "webview滑动：isScroll=$isScroll")
-                Thread.sleep(1200)
-//                }
-            }
+//            if (nodeInfo.childCount > 0 && WEBVIEW == nodeInfo.getChild(0).className.toString()) {
+//                // 向上滑动
+//                val isScroll = scrollByNode(service, nodeInfo.getChild(0), 0, -340)
+//                Log.i(TAG, "webview滑动：isScroll=$isScroll")
+//                Thread.sleep(1200)
+//            }
             for (index in 0 until nodeInfo.childCount) {
                 val childNodeInfo = nodeInfo.getChild(index)
                 Log.i(
                     TAG,
                     "一级递归：index=$index childCount=${childNodeInfo.childCount} clsName=${childNodeInfo.className}"
                 )
-                if ("android.webkit.WebView" == childNodeInfo.className) {
-//                    Log.i(TAG, "一级递归：webview url=${(childNodeInfo as WebView).url}")
-                }
                 for(index2 in 0 until childNodeInfo.childCount) {
                     val childNodeInfo2 = childNodeInfo.getChild(index2)
                     Log.i(TAG, "二级递归：index=$index2 childCount=${childNodeInfo2.childCount} clsName=${childNodeInfo2.className}")
-//                    if (childNodeInfo2.childCount > 0 && WEBVIEW == childNodeInfo2.className.toString()) {
-//                        Log.i(TAG, "二级webview滑动")
-//                        // 向上滑动
-//                        childNodeInfo2.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
-//                        Thread.sleep(800)
-//                        Toast.makeText(service,"滑动一下",Toast.LENGTH_SHORT)
-//                    }
                     if (TEXT_VIEW == childNodeInfo2.className) {
                         Log.i(TAG, "二级递归：textView内容=${childNodeInfo2.text}")
                     }
@@ -139,11 +127,76 @@ internal object DyAccessUtil {
                                                 TAG,
                                                 "六级递归：textView内容=${childNodeInfo7.text}"
                                             )
-                                        } else if (BUTTON_VIEW == childNodeInfo7.className) {
+                                        } else if (BUTTON_VIEW == childNodeInfo7.className && childNodeInfo7.text.toString().contains("LION狮王大白牙膏WHITE去黄去牙")) {
                                             Log.i(
                                                 TAG,
-                                                "六级递归：buttonView内容=${childNodeInfo7.text}"
+                                                "六级递归111：buttonView内容=${childNodeInfo7.text}"
                                             )
+                                            childNodeInfo7.toString().apply {
+                                                childNodeInfo7.toString().apply {
+                                                    val boundsInScreen = substring(
+                                                        indexOf("boundsInScreen: Rect") + "boundsInScreen: Rect".length,
+                                                        indexOf(
+                                                            ";",
+                                                            indexOf("boundsInScreen: Rect")
+                                                        )
+                                                    )
+                                                    Log.i(
+                                                        TAG,
+                                                        "六级递归：讲解 boundsInScreen=$boundsInScreen"
+                                                    )
+                                                    val rect = Rect()
+                                                    boundsInScreen.apply {
+                                                        var indexS = 0
+                                                        var tapX0 =
+                                                            substring(
+                                                                indexOf("(")+1,
+                                                                indexOf(",")
+                                                            ).toInt()
+                                                        var tapY0 =
+                                                            substring(
+                                                                indexOf(", ")+2,
+                                                                indexOf(" -")
+                                                            ).toInt()
+                                                        indexS = indexOf(",",indexOf("- "))
+                                                        var tapX1 =
+                                                            substring(
+                                                                indexOf("- ")+2,
+                                                                indexS
+                                                            ).toInt()
+                                                        var tapY1 =
+                                                            substring(
+                                                                indexOf(
+                                                                    ", ",
+                                                                    indexS
+                                                                ) + 2,
+                                                                indexOf(")")
+                                                            ).toInt()
+                                                        Log.i(
+                                                            TAG,
+                                                            "六级递归：商品item按钮坐标 tapX0=$tapX0 tapY0=$tapY0 tapX1=$tapX1 tapY1=$tapY1"
+                                                        )
+                                                        rect.left = tapX1 - 160
+                                                        rect.top = tapY1 - 65
+                                                        rect.right = tapX1 - 50
+                                                        rect.bottom = tapY1 - 15
+
+                                                        Log.i(
+                                                            TAG,
+                                                            "六级递归：商品item中讲解按钮坐标 left=${rect.left} top=${rect.top} right=${rect.right} bottom=${rect.bottom}"
+                                                        )
+//                                                    AccessUtil.showRectCheck(service, rect, 1023, 1815)
+//                                                    AccessUtil.showRectCheck(service, Rect(tapX0,tapY0,tapX1,tapY1), 1023, 1815)
+                                                    }
+                                                    for (index in 0 until 2) {
+                                                        rect.top--
+                                                        rect.bottom--
+                                                        Thread.sleep(420)
+                                                        mockClkByNode(service, rect)
+                                                    }
+//                                                mockClkByNode(service, rect)
+                                                }
+                                            }
                                         }
                                         for (index8 in 0 until childNodeInfo7.childCount) {
                                             val childNodeInfo8 =
@@ -155,12 +208,11 @@ internal object DyAccessUtil {
                                                     "七级递归：textView内容=${childNodeInfo8.text}"
                                                 )
 //                                                if ("用户评论" == childNodeInfo8.text.toString() && !commentIsExecuteFinish) {
-                                                if ("用户评论" == childNodeInfo8.text.toString() && !commentIsExecuteFinish) {
-                                                    edtRootNodeInfo = childNodeInfo8.parent.parent.parent
-                                                    childNodeInfo8.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                                    commentIsExecuteFinish = true
-                                                    break
-                                                }
+//                                                    edtRootNodeInfo = childNodeInfo8.parent.parent.parent
+//                                                    childNodeInfo8.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+//                                                    commentIsExecuteFinish = true
+//                                                    break
+//                                                }
                                             }
                                             for (index9 in 0 until childNodeInfo8.childCount) {
                                                 val childNodeInfo9 =
@@ -181,20 +233,12 @@ internal object DyAccessUtil {
                                                         Log.i(TAG, "十级递归：index=$index11 childCount=${childNodeInfo11.childCount} clsName=${childNodeInfo11.className}")
                                                         if (TEXT_VIEW == childNodeInfo11.className) {
                                                             Log.i(TAG, "十级递归：textView内容=${childNodeInfo11.text}")
-//                                            if ("用户评论" == childNodeInfo7.text.toString()) {
-//                                                // 触发点击事件
-//                                                childNodeInfo7.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//                                            }
                                                         }
                                                         for (index12 in 0 until childNodeInfo11.childCount) {
                                                             val childNodeInfo12 = childNodeInfo11.getChild(index12) ?: continue
                                                             Log.i(TAG, "十一级递归：index=$index11 childCount=${childNodeInfo12.childCount} clsName=${childNodeInfo12.className}")
                                                             if (TEXT_VIEW == childNodeInfo12.className) {
                                                                 Log.i(TAG, "十一级递归：textView内容=${childNodeInfo12.text}")
-//                                            if ("用户评论" == childNodeInfo7.text.toString()) {
-//                                                // 触发点击事件
-//                                                childNodeInfo7.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//                                            }
                                                             }
                                                         }
                                                     }
@@ -232,13 +276,6 @@ internal object DyAccessUtil {
                 for(index2 in 0 until childNodeInfo.childCount) {
                     val childNodeInfo2 = childNodeInfo.getChild(index2)
                     Log.i(TAG, "二级递归：index=$index2 childCount=${childNodeInfo2.childCount} clsName=${childNodeInfo2.className}")
-//                    if (childNodeInfo2.childCount > 0 && WEBVIEW == childNodeInfo2.className.toString()) {
-//                        Log.i(TAG, "二级webview滑动")
-//                        // 向上滑动
-//                        childNodeInfo2.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
-//                        Thread.sleep(800)
-//                        Toast.makeText(service,"滑动一下",Toast.LENGTH_SHORT)
-//                    }
                     if (TEXT_VIEW == childNodeInfo2.className) {
                         Log.i(TAG, "二级递归：textView内容=${childNodeInfo2.text}")
                     }
@@ -295,19 +332,19 @@ internal object DyAccessUtil {
                                                     "七级递归：textView内容=${childNodeInfo8.text}"
                                                 )
                                             }
-                                            for (index9 in 0 until childNodeInfo8.childCount) {
-                                                val childNodeInfo9 = childNodeInfo8.getChild(index9)
-                                                Log.i(TAG, "八级递归：index=$index9 childCount=${childNodeInfo9.childCount} windowId=${childNodeInfo9.windowId} clsName=${childNodeInfo9.className}")
-                                                if (EDIT_TEXT == childNodeInfo9.className) {
-                                                    Log.i(TAG, "八级递归：开始点击输入框")
-                                                    childNodeInfo9.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                                    Thread.sleep(1200)
-                                                    Log.i(TAG, "八级递归：开始粘贴内容")
-                                                    fillInput(service,childNodeInfo9,"欢迎进入直播间...")
-                                                    Thread.sleep(1000)
-                                                    isFillEndEdt = true
-                                                }
-                                            }
+//                                            for (index9 in 0 until childNodeInfo8.childCount) {
+//                                                val childNodeInfo9 = childNodeInfo8.getChild(index9)
+//                                                Log.i(TAG, "八级递归：index=$index9 childCount=${childNodeInfo9.childCount} windowId=${childNodeInfo9.windowId} clsName=${childNodeInfo9.className}")
+//                                                if (EDIT_TEXT == childNodeInfo9.className) {
+//                                                    Log.i(TAG, "八级递归：开始点击输入框")
+//                                                    childNodeInfo9.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+//                                                    Thread.sleep(1200)
+//                                                    Log.i(TAG, "八级递归：开始粘贴内容")
+//                                                    fillInput(service,childNodeInfo9,"欢迎进入直播间...")
+//                                                    Thread.sleep(1000)
+//                                                    isFillEndEdt = true
+//                                                }
+//                                            }
                                         }
                                     }
                                 }
@@ -324,172 +361,173 @@ internal object DyAccessUtil {
                 if (sendViewList?.isEmpty() == true) { // 走备用ID
                     sendViewList = findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID_BACKUP)
                 }
-                if (sendViewList?.isNotEmpty() == true) {
-                    val nodeInfo = sendViewList[0]
-                    Log.i(TAG, "childCount=${nodeInfo.childCount} clsName=${nodeInfo.className}")
-                    for (index in 0 until nodeInfo.childCount) {
-                        val childNodeInfo = nodeInfo.getChild(index)
-                        Log.i(
-                            TAG,
-                            "一级递归：index=$index childCount=${childNodeInfo.childCount} clsName=${childNodeInfo.className}"
-                        )
-                        for (index2 in 0 until childNodeInfo.childCount) {
-                            val childNodeInfo2 = childNodeInfo.getChild(index2)
-                            Log.i(
-                                TAG,
-                                "二级递归：index=$index2 childCount=${childNodeInfo2.childCount} clsName=${childNodeInfo2.className}"
-                            )
-                            if (TEXT_VIEW == childNodeInfo2.className) {
-                                Log.i(TAG, "二级递归：textView内容=${childNodeInfo2.text}")
-                            }
-                            for (index3 in 0 until childNodeInfo2.childCount) {
-                                val childNodeInfo3 = childNodeInfo2.getChild(index3)
-                                Log.i(
-                                    TAG,
-                                    "二级递归：index=$index3 childCount=${childNodeInfo3.childCount} clsName=${childNodeInfo3.className}"
-                                )
-                                for (index4 in 0 until childNodeInfo3.childCount) {
-                                    val childNodeInfo4 = childNodeInfo3.getChild(index4)
-                                    Log.i(
-                                        TAG,
-                                        "三级递归：index=$index4 childCount=${childNodeInfo4.childCount} clsName=${childNodeInfo4.className}"
-                                    )
-                                    if (TEXT_VIEW == childNodeInfo4.className) {
-                                        Log.i(
-                                            TAG,
-                                            "三级递归：textView内容=${childNodeInfo4.text}"
-                                        )
-                                    }
-                                    for (index5 in 0 until childNodeInfo4.childCount) {
-                                        val childNodeInfo5 = childNodeInfo4.getChild(index5)
-                                        Log.i(
-                                            TAG,
-                                            "四级递归：index=$index5 childCount=${childNodeInfo5.childCount} clsName=${childNodeInfo5.className}"
-                                        )
-                                        if (TEXT_VIEW == childNodeInfo5.className) {
-                                            Log.i(
-                                                TAG,
-                                                "四级递归：textView内容=${childNodeInfo5.text}"
-                                            )
-                                        }
-                                        for (index6 in 0 until childNodeInfo5.childCount) {
-                                            val childNodeInfo6 = childNodeInfo5.getChild(index6)
-                                            Log.i(
-                                                TAG,
-                                                "五级递归：index=$index6 childCount=${childNodeInfo6.childCount} clsName=${childNodeInfo6.className}"
-                                            )
-                                            if (TEXT_VIEW == childNodeInfo6.className) {
-                                                Log.i(
-                                                    TAG,
-                                                    "五级递归：textView内容=${childNodeInfo6.text}"
-                                                )
-                                                if ("去开播" == childNodeInfo6.text.toString() && !goOpenIsExecuteFinish) {
-                                                    // 触发点击事件
-                                                    childNodeInfo6.performAction(
-                                                        AccessibilityNodeInfo.ACTION_CLICK
-                                                    )
-                                                    goOpenIsExecuteFinish = true
-                                                }
-                                            }
-                                            for (index7 in 0 until childNodeInfo6.childCount) {
-                                                val childNodeInfo7 =
-                                                    childNodeInfo6.getChild(index7) ?: continue
-                                                Log.i(
-                                                    TAG,
-                                                    "六级递归：index=$index7 childCount=${childNodeInfo7?.childCount} clsName=${childNodeInfo7?.className}"
-                                                )
-                                                if (TEXT_VIEW == childNodeInfo7.className) {
-                                                    Log.i(
-                                                        TAG,
-                                                        "六级递归：textView内容=${childNodeInfo7.text}"
-                                                    )
-                                                } else if (BUTTON_VIEW == childNodeInfo7.className) {
-                                                    Log.i(
-                                                        TAG,
-                                                        "六级递归：buttonView内容=${childNodeInfo7.text}"
-                                                    )
-                                                }
-                                                for (index8 in 0 until childNodeInfo7.childCount) {
-                                                    val childNodeInfo8 =
-                                                        childNodeInfo7.getChild(index8)
-                                                    Log.i(
-                                                        TAG,
-                                                        "七级递归：index=$index8 childCount=${childNodeInfo8.childCount} windowId=${childNodeInfo8.windowId} clsName=${childNodeInfo8.className}"
-                                                    )
-                                                    if (TEXT_VIEW == childNodeInfo8.className) {
-                                                        Log.i(
-                                                            TAG,
-                                                            "七级递归：textView内容=${childNodeInfo8.text}"
-                                                        )
-                                                        // 发送按钮
-                                                        if ("send_icon" == childNodeInfo8.viewIdResourceName) {
-                                                            Log.i(
-                                                                TAG,
-                                                                "七级递归：点击发送按钮 childNodeInfo8=${childNodeInfo8}"
-                                                            )
-                                                            childNodeInfo8.toString().apply {
-                                                                val boundsInScreen = substring(
-                                                                    indexOf("boundsInScreen: Rect") + "boundsInScreen: Rect".length,
-                                                                    indexOf(
-                                                                        ";",
-                                                                        indexOf("boundsInScreen: Rect")
-                                                                    )
-                                                                )
-                                                                Log.i(
-                                                                    TAG,
-                                                                    "七级递归：发送按钮坐标 boundsInScreen=$boundsInScreen"
-                                                                )
-                                                                val rect = Rect()
-                                                                boundsInScreen.apply {
-                                                                    var indexS = 0
-                                                                    var tapX0 =
-                                                                        substring(
-                                                                            indexOf("(")+1,
-                                                                            indexOf(",")
-                                                                        ).toInt()
-                                                                    var tapY0 =
-                                                                        substring(
-                                                                            indexOf(", ")+2,
-                                                                            indexOf(" -")
-                                                                        ).toInt()
-                                                                    indexS = indexOf(",",indexOf("- "))
-                                                                    var tapX1 =
-                                                                        substring(
-                                                                            indexOf("- ")+2,
-                                                                            indexS
-                                                                        ).toInt()
-                                                                    var tapY1 =
-                                                                        substring(
-                                                                            indexOf(
-                                                                                ", ",
-                                                                                indexS
-                                                                            ) + 2,
-                                                                            indexOf(")")
-                                                                        ).toInt()
-                                                                    Log.i(
-                                                                        TAG,
-                                                                        "七级递归：发送按钮坐标 tapX0=$tapX0 tapY0=$tapY0 tapX1=$tapX1 tapY1=$tapY1"
-                                                                    )
-                                                                    rect.left = tapX0
-//                                                                    rect.top = tapY0
-                                                                    rect.top = 1254
-                                                                    rect.right = tapX1
-//                                                                    rect.bottom = tapY1
-                                                                    rect.bottom = 1325
-                                                                }
-                                                                mockClkByNode(service, rect)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+//                if (sendViewList?.isNotEmpty() == true) {
+//                    val nodeInfo = sendViewList[0]
+//                    Log.i(TAG, "childCount=${nodeInfo.childCount} clsName=${nodeInfo.className}")
+//                    for (index in 0 until nodeInfo.childCount) {
+//                        val childNodeInfo = nodeInfo.getChild(index)
+//                        Log.i(
+//                            TAG,
+//                            "一级递归：index=$index childCount=${childNodeInfo.childCount} clsName=${childNodeInfo.className}"
+//                        )
+//                        for (index2 in 0 until childNodeInfo.childCount) {
+//                            val childNodeInfo2 = childNodeInfo.getChild(index2)
+//                            Log.i(
+//                                TAG,
+//                                "二级递归：index=$index2 childCount=${childNodeInfo2.childCount} clsName=${childNodeInfo2.className}"
+//                            )
+//                            if (TEXT_VIEW == childNodeInfo2.className) {
+//                                Log.i(TAG, "二级递归：textView内容=${childNodeInfo2.text}")
+//                            }
+//                            for (index3 in 0 until childNodeInfo2.childCount) {
+//                                val childNodeInfo3 = childNodeInfo2.getChild(index3)
+//                                Log.i(
+//                                    TAG,
+//                                    "二级递归：index=$index3 childCount=${childNodeInfo3.childCount} clsName=${childNodeInfo3.className}"
+//                                )
+//                                for (index4 in 0 until childNodeInfo3.childCount) {
+//                                    val childNodeInfo4 = childNodeInfo3.getChild(index4)
+//                                    Log.i(
+//                                        TAG,
+//                                        "三级递归：index=$index4 childCount=${childNodeInfo4.childCount} clsName=${childNodeInfo4.className}"
+//                                    )
+//                                    if (TEXT_VIEW == childNodeInfo4.className) {
+//                                        Log.i(
+//                                            TAG,
+//                                            "三级递归：textView内容=${childNodeInfo4.text}"
+//                                        )
+//                                    }
+//                                    for (index5 in 0 until childNodeInfo4.childCount) {
+//                                        val childNodeInfo5 = childNodeInfo4.getChild(index5)
+//                                        Log.i(
+//                                            TAG,
+//                                            "四级递归：index=$index5 childCount=${childNodeInfo5.childCount} clsName=${childNodeInfo5.className}"
+//                                        )
+//                                        if (TEXT_VIEW == childNodeInfo5.className) {
+//                                            Log.i(
+//                                                TAG,
+//                                                "四级递归：textView内容=${childNodeInfo5.text}"
+//                                            )
+//                                        }
+//                                        for (index6 in 0 until childNodeInfo5.childCount) {
+//                                            val childNodeInfo6 = childNodeInfo5.getChild(index6)
+//                                            Log.i(
+//                                                TAG,
+//                                                "五级递归：index=$index6 childCount=${childNodeInfo6.childCount} clsName=${childNodeInfo6.className}"
+//                                            )
+//                                            if (TEXT_VIEW == childNodeInfo6.className) {
+//                                                Log.i(
+//                                                    TAG,
+//                                                    "五级递归：textView内容=${childNodeInfo6.text}"
+//                                                )
+//                                                if ("去开播" == childNodeInfo6.text.toString() && !goOpenIsExecuteFinish) {
+//                                                    // 触发点击事件
+//                                                    childNodeInfo6.performAction(
+//                                                        AccessibilityNodeInfo.ACTION_CLICK
+//                                                    )
+//                                                    goOpenIsExecuteFinish = true
+//                                                }
+//                                            }
+//                                            for (index7 in 0 until childNodeInfo6.childCount) {
+//                                                val childNodeInfo7 =
+//                                                    childNodeInfo6.getChild(index7) ?: continue
+//                                                Log.i(
+//                                                    TAG,
+//                                                    "六级递归：index=$index7 childCount=${childNodeInfo7?.childCount} clsName=${childNodeInfo7?.className}"
+//                                                )
+//                                                if (TEXT_VIEW == childNodeInfo7.className) {
+//                                                    Log.i(
+//                                                        TAG,
+//                                                        "六级递归：textView内容=${childNodeInfo7.text}"
+//                                                    )
+//                                                } else if (BUTTON_VIEW == childNodeInfo7.className) {
+//                                                    Log.i(
+//                                                        TAG,
+//                                                        "六级递归：buttonView内容=${childNodeInfo7.text}"
+//                                                    )
+//                                                }
+//                                                for (index8 in 0 until childNodeInfo7.childCount) {
+//                                                    val childNodeInfo8 =
+//                                                        childNodeInfo7.getChild(index8)
+//                                                    Log.i(
+//                                                        TAG,
+//                                                        "七级递归：index=$index8 childCount=${childNodeInfo8.childCount} windowId=${childNodeInfo8.windowId} clsName=${childNodeInfo8.className}"
+//                                                    )
+//                                                    if (TEXT_VIEW == childNodeInfo8.className) {
+//                                                        Log.i(
+//                                                            TAG,
+//                                                            "七级递归：textView内容=${childNodeInfo8.text}"
+//                                                        )
+//                                                        // 发送按钮
+//                                                        if ("send_icon" == childNodeInfo8.viewIdResourceName) {
+//                                                            Log.i(
+//                                                                TAG,
+//                                                                "七级递归：点击发送按钮 childNodeInfo8=${childNodeInfo8}"
+//                                                            )
+//                                                            childNodeInfo8.toString().apply {
+//                                                                val boundsInScreen = substring(
+//                                                                    indexOf("boundsInScreen: Rect") + "boundsInScreen: Rect".length,
+//                                                                    indexOf(
+//                                                                        ";",
+//                                                                        indexOf("boundsInScreen: Rect")
+//                                                                    )
+//                                                                )
+//                                                                Log.i(
+//                                                                    TAG,
+//                                                                    "七级递归：发送按钮坐标 boundsInScreen=$boundsInScreen"
+//                                                                )
+//                                                                val rect = Rect()
+//                                                                boundsInScreen.apply {
+//                                                                    var indexS = 0
+//                                                                    var tapX0 =
+//                                                                        substring(
+//                                                                            indexOf("(")+1,
+//                                                                            indexOf(",")
+//                                                                        ).toInt()
+//                                                                    var tapY0 =
+//                                                                        substring(
+//                                                                            indexOf(", ")+2,
+//                                                                            indexOf(" -")
+//                                                                        ).toInt()
+//                                                                    indexS = indexOf(",",indexOf("- "))
+//                                                                    var tapX1 =
+//                                                                        substring(
+//                                                                            indexOf("- ")+2,
+//                                                                            indexS
+//                                                                        ).toInt()
+//                                                                    var tapY1 =
+//                                                                        substring(
+//                                                                            indexOf(
+//                                                                                ", ",
+//                                                                                indexS
+//                                                                            ) + 2,
+//                                                                            indexOf(")")
+//                                                                        ).toInt()
+//                                                                    Log.i(
+//                                                                        TAG,
+//                                                                        "七级递归：发送按钮坐标 tapX0=$tapX0 tapY0=$tapY0 tapX1=$tapX1 tapY1=$tapY1"
+//                                                                    )
+//                                                                    rect.left = tapX0
+////                                                                    rect.top = tapY0
+//                                                                    rect.top = 1254
+//                                                                    rect.right = tapX1
+////                                                                    rect.bottom = tapY1
+//                                                                    rect.bottom = 1325
+//                                                                }
+////                                                                AccessUtil.showRectCheck(service,rect,0,0)
+////                                                                mockClkByNode(service, rect)
+//                                                            }
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
 
             }
         }

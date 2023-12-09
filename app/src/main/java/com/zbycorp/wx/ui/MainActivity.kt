@@ -2,6 +2,7 @@ package com.zbycorp.wx.ui
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
             KsAccessUtil.openKsApp(this)
         }
         binding.btnOpenDy.setOnClickListener {
+            AccessUtil.updateTips("进入抖音APP")
             DyAccessUtil.openDyApp(this)
         }
         binding.btnSend.setOnClickListener {
@@ -46,8 +48,7 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
-
-        AccessUtil.showWindowTips(this)
+//        AccessUtil.showWindowTips(this)
     }
 
     override fun onResume() {
@@ -90,6 +91,7 @@ class MainActivity : AppCompatActivity() {
         KsAccessUtil.userProfileIsExecuteFinish = false
         KsAccessUtil.imChatIsExecuteFinish = false
         AccessUtil.dismissWindowTips()
+        AccessUtil.dismissWindowRect()
     }
 
 }

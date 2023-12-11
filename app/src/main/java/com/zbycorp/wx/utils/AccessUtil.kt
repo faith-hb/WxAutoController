@@ -93,10 +93,13 @@ internal object AccessUtil {
 
     fun mockClkByNode(
         service: AccessibilityService,
-        rect: Rect
+        rect: Rect,
+        isSend:Boolean
     ): Boolean {
-        val point = Point((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2)
-//        val point = Point(rect.right - 10, (rect.top + rect.bottom) / 2)
+        var point = Point((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2)
+        if (isSend) {
+            point = Point(rect.right - 10, (rect.top + rect.bottom) / 2)
+        }
         val builder = GestureDescription.Builder()
         val path = Path()
         val pointX = point.x.toFloat()

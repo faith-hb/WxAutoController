@@ -56,7 +56,37 @@ public interface DyResId {
         // 根节点ID
         String ROOT_ID = BASE_LAYOUT_ID + "bqq";
         String ROOT_ID_BACKUP = BASE_LAYOUT_ID + "bqx";
+        /**
+         * 滑动后的rootId
+         */
+        String LIVE_CONTROL = "live_control";
         // 商品管理弹窗
         String GOODS_DIALOG = BASE_LAYOUT_ID + "krn_content_container";
+    }
+
+    /**
+     * 节点行为
+     */
+    interface ACTION {
+        /**
+         * 自动滑动
+         */
+        String START_SCROLL = "start_scroll";
+        /**
+         * 讲解商品
+         */
+        String EXPLAIN_GOODS = "explain_goods";
+        /**
+         * 用户评论
+         */
+        String USER_COMMENT = "user_comment";
+        /**
+         * 输入评论
+         */
+        String INPUT_COMMENT = "input_comment";
+        /**
+         * 发送评论
+         */
+        String SEND_COMMENT = "send_comment";
     }
 }

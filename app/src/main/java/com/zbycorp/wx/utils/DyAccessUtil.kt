@@ -66,7 +66,6 @@ internal object DyAccessUtil {
             // 向上滑动
             val isScroll = scrollByNode(service, nodeInfo.getChild(0), 0, -240)
             Log.i(TAG, "webview滑动：isScroll=$isScroll")
-            AccessUtil.updateTips("向上滑动")
         }
     }
 
@@ -339,9 +338,9 @@ internal object DyAccessUtil {
     }
 
     fun liveCenterControlMessage(service: AccessibilityService) {
-        AccessUtil.updateTips("进入直播中控页面")
         GlobalScope.launch(Dispatchers.Main) {
             delay(3200)
+            AccessUtil.updateTips("模拟点击：讲解商品")
             var viewGoodsList = findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
             if (viewGoodsList?.isEmpty() == true) { // 走备用ID
                 viewGoodsList =
@@ -374,6 +373,7 @@ internal object DyAccessUtil {
 
             Log.i(TAG, "***************用户评论->start*********************")
             delay(3200)
+            AccessUtil.updateTips("模拟点击：用户评论")
             var viewCommentList =
                 findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
             if (viewCommentList?.isEmpty() == true) {
@@ -389,6 +389,7 @@ internal object DyAccessUtil {
 
             Log.i(TAG, "***************滑动->start*********************")
             delay(1200)
+            AccessUtil.updateTips("模拟向上滑动")
             var viewScrollList =
                 findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
             if (viewScrollList?.isEmpty() == true) {
@@ -405,6 +406,7 @@ internal object DyAccessUtil {
             if (!commentIsExecuteFinish) return@launch
             Log.i(TAG, "***************输入评论->start*********************")
             delay(3200)
+            AccessUtil.updateTips("自动化填写文本框内容")
             var viewInputList =
                 findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
             if (viewInputList?.isEmpty() == true) {
@@ -420,7 +422,8 @@ internal object DyAccessUtil {
 
             if (!isFillEndEdt) return@launch
             Log.i(TAG, "***************发送评论->start*********************")
-            delay(3200)
+            delay(2200)
+            AccessUtil.updateTips("模拟点击：发送弹幕")
             var viewSendList =
                 findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
             if (viewSendList?.isEmpty() == true) {
@@ -433,6 +436,11 @@ internal object DyAccessUtil {
             }
             traverseNode(ACTION.SEND_COMMENT, service, viewSendList!![0])
             Log.i(TAG, "***************发送评论->end*********************")
+
+            delay(2200)
+            AccessUtil.updateTips("自动化演示结束")
+            delay(1200)
+            AccessUtil.dismissWindowTips()
         }
     }
 }

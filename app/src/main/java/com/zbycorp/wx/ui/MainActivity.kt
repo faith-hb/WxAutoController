@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
-//        AccessUtil.showWindowTips(this)
+        AccessUtil.showWindowTips(this)
     }
 
     override fun onResume() {

@@ -19,6 +19,10 @@ public interface DyResId {
      */
     String SPLASH_PAGE = "com.ss.android.ugc.aweme.splash.SplashActivity";
     /**
+     * 首页
+     */
+    String MAIN_PAGE = "com.ss.android.ugc.aweme.main.MainActivity";
+    /**
      * 直播间页面
      */
     String LIVE_PAGE = "com.ss.android.ugc.aweme.live.LivePlayActivity";

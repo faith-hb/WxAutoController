@@ -82,13 +82,23 @@ class AccessService : AccessibilityService() {
 
     private fun handleDyEvent(event: AccessibilityEvent) {
         when (event.className.toString()) {
+            DyResId.MAIN_PAGE -> {
+                AccessUtil.updateTips("进入首页")
+            }
+
+            "com.ss.android.ugc.aweme.live.LiveDummyActivity" -> {
+                AccessUtil.updateTips("进入电商带货页面")
+            }
+
             DyResId.LIVE_PAGE -> {
 
             }
 
             DyResId.LIVE_CENTER_CONTROL_PAGE -> {
+                AccessUtil.updateTips("进入直播中控页面")
                 DyAccessUtil.liveCenterControlMessage(this@AccessService)
             }
+
             else -> {
                 DyAccessUtil.commentIsExecuteFinish = false
             }

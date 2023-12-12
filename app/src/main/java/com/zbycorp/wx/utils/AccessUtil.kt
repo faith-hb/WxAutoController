@@ -76,6 +76,7 @@ internal object AccessUtil {
         )
         builder.addStroke(GestureDescription.StrokeDescription(path, 50L, 520L))
         val gesture = builder.build()
+        // Android7中新加入的API
         return service.dispatchGesture(
             gesture,
             object : AccessibilityService.GestureResultCallback() {

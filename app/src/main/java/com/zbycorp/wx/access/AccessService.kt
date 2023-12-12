@@ -1,6 +1,7 @@
 package com.zbycorp.wx.access
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.webkit.WebView
@@ -15,6 +16,11 @@ class AccessService : AccessibilityService() {
 
     companion object {
         const val TAG = "无障碍服务"
+    }
+
+    override fun onServiceConnected() { // 开启无障碍权限时被调用
+        super.onServiceConnected()
+        Log.i(TAG,"onServiceConnected...")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -96,6 +102,8 @@ class AccessService : AccessibilityService() {
 
             DyResId.LIVE_CENTER_CONTROL_PAGE -> {
                 AccessUtil.updateTips("进入直播中控页面")
+                serviceInfo.flags =
+                    serviceInfo.flags or AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY
                 DyAccessUtil.liveCenterControlMessage(this@AccessService)
             }
 

@@ -72,6 +72,14 @@ public interface DyResId {
     }
 
     /**
+     * 电商带货页面
+     */
+    interface LIVE_DUMMY_PAGE {
+        String IOE = BASE_LAYOUT_ID + "ioe";
+        String SHOP_WINDOW_MAIN_PAGE_CONTAINER = "shopWindowMainPageContainer";
+    }
+
+    /**
      * 直播中控页面
      */
     interface LIVE_CENTER_CONTROL_PAGE {

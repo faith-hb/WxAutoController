@@ -14,6 +14,7 @@ import com.zbycorp.wx.utils.AccessUtil.EDIT_TEXT
 import com.zbycorp.wx.utils.AccessUtil.TEXT_VIEW
 import com.zbycorp.wx.utils.AccessUtil.WEBVIEW
 import com.zbycorp.wx.utils.AccessUtil.fillInput
+import com.zbycorp.wx.utils.AccessUtil.findNodesByText
 import com.zbycorp.wx.utils.AccessUtil.findNodesByViewId
 import com.zbycorp.wx.utils.AccessUtil.mockClkByNode
 import com.zbycorp.wx.utils.AccessUtil.scrollByNode
@@ -172,6 +173,68 @@ internal object DyAccessUtil {
                     mockClkByNode(service, rect)
                 }
             }
+
+            delay(3200)
+            AccessUtil.updateTips("模拟点击：去直播中控")
+            val viewCenterList = findNodesByText(service, "去直播中控")
+            if (viewCenterList.isNullOrEmpty()) {
+                AccessUtil.updateTips("中断：去直播中控节点ID变更")
+                return@launch
+            }
+            val rect = getNodeRect(viewCenterList[0])
+            if (rect != null) {
+                mockClkByNode(service, rect)
+            }
+        }
+    }
+
+    fun centerTab(service: AccessibilityService) {
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(3200)
+            AccessUtil.updateTips("模拟点击：去直播中控")
+            val viewCenterList = findNodesByViewId(service, DyResId.LIVE_DUMMY_PAGE.IOE)
+            if (viewCenterList.isNullOrEmpty()) {
+                AccessUtil.updateTips("中断：去直播中控节点ID变更")
+                return@launch
+            }
+            val accessibilityNodeInfo1 = viewCenterList[0]
+            if (accessibilityNodeInfo1.childCount > 0) {
+                // FrameLayout
+                val accessibilityNodeInfo2 = accessibilityNodeInfo1.getChild(0)
+                if (accessibilityNodeInfo2.childCount > 0) {
+                    // WebView
+                    val accessibilityNodeInfo3 = accessibilityNodeInfo2.getChild(0)
+                    if (accessibilityNodeInfo3.childCount > 0) {
+                        // WebView
+                        val accessibilityNodeInfo4 = accessibilityNodeInfo3.getChild(0)
+                        if (accessibilityNodeInfo4.childCount > 0) {
+                            // View
+                            val accessibilityNodeInfo5 = accessibilityNodeInfo4.getChild(0)
+                            if (accessibilityNodeInfo5.childCount > 0) {
+                                // View
+                                val accessibilityNodeInfo6 = accessibilityNodeInfo5.getChild(0)
+                                val count = accessibilityNodeInfo6.childCount
+                                if (count > 9) {
+                                    val accessibilityNodeInfo = accessibilityNodeInfo6.getChild(9)
+                                    if (accessibilityNodeInfo.childCount > 4) {
+                                        val nodeInfo1 = accessibilityNodeInfo.getChild(4)
+                                        if (nodeInfo1.childCount > 3) {
+                                            val nodeInfo2 = nodeInfo1.getChild(3)
+                                            val rect = getNodeRect(nodeInfo2)
+                                            if (rect != null) {
+                                                mockClkByNode(service, rect)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
         }
     }
 

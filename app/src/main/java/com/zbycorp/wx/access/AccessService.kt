@@ -95,6 +95,7 @@ class AccessService : AccessibilityService() {
 
             "com.ss.android.ugc.aweme.live.LiveDummyActivity" -> {
                 AccessUtil.updateTips("进入电商带货页面")
+                DyAccessUtil.centerTab(this)
             }
 
             DyResId.LIVE_PAGE -> {

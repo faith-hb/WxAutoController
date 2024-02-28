@@ -15,7 +15,7 @@ import java.lang.Exception
 class AccessService : AccessibilityService() {
 
     companion object {
-        const val TAG = "无障碍服务"
+        const val TAG = "AccessibilityService:"
     }
 
     override fun onServiceConnected() { // 开启无障碍权限时被调用
@@ -90,6 +90,7 @@ class AccessService : AccessibilityService() {
         when (event.className.toString()) {
             DyResId.MAIN_PAGE -> {
                 AccessUtil.updateTips("进入首页")
+                DyAccessUtil.mainTab(this)
             }
 
             "com.ss.android.ugc.aweme.live.LiveDummyActivity" -> {

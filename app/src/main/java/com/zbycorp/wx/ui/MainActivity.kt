@@ -2,16 +2,14 @@ package com.zbycorp.wx.ui
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Rect
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.lzf.easyfloat.EasyFloat
-import com.lzf.easyfloat.enums.ShowPattern
-import com.zbycorp.wx.R
+import com.zbycorp.wx.contants.DyResId
 import com.zbycorp.wx.databinding.ActivityMainBinding
 import com.zbycorp.wx.utils.AccessUtil
 import com.zbycorp.wx.utils.DyAccessUtil
@@ -21,18 +19,26 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    companion object {
+        const val TAG = "MainActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.i("MainActivity1", "onCreate...")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.btnOpenKs.setOnClickListener {
-            AccessUtil.updateTips("进入快手APP")
-            KsAccessUtil.openKsApp(this)
+            if (safeCheckWhenOpenApp()) {
+                AccessUtil.updateTips("进入快手APP")
+                KsAccessUtil.openKsApp(this)
+            }
         }
         binding.btnOpenDy.setOnClickListener {
-            AccessUtil.updateTips("进入抖音APP")
-            DyAccessUtil.openDyApp(this)
+            if (safeCheckWhenOpenApp()) {
+                AccessUtil.updateTips("进入抖音APP")
+                DyAccessUtil.openDyApp(this)
+            }
         }
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
@@ -57,6 +63,14 @@ class MainActivity : AppCompatActivity() {
         if (isAccessibilitySettingsOn(this)) {
             AccessUtil.updateTips("Demo演示操作准备中\n无障碍服务已开启")
         }
+    }
+
+    private fun safeCheckWhenOpenApp(): Boolean {
+        if (!isAccessibilitySettingsOn(this)) {
+//            AccessUtil.showToast(this, "请先开启无障碍服务")
+            return false
+        }
+        return true
     }
 
     private fun isAccessibilitySettingsOn(context: Context): Boolean {

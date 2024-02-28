@@ -95,7 +95,7 @@ internal object AccessUtil {
     fun mockClkByNode(
         service: AccessibilityService,
         rect: Rect,
-        isSend:Boolean
+        isSend: Boolean = false, isLongClk: Boolean = false
     ): Boolean {
         var point = Point((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2)
         if (isSend) {
@@ -105,14 +105,18 @@ internal object AccessUtil {
         val path = Path()
         val pointX = point.x.toFloat()
         val pointY = point.y.toFloat()
-//        val pointY = 1686f
         path.moveTo(pointX, pointY)
 //        path.lineTo(pointX, pointY)
         Log.e(
             TAG,
             "moveStartX=${point.x.toFloat()} moveStartY=${point.y.toFloat()}"
         )
-        builder.addStroke(GestureDescription.StrokeDescription(path, 50L, 320L))
+        // duration参数设置320会触发长按事件
+        builder.addStroke(
+            GestureDescription.StrokeDescription(
+                path, 50L, if (isLongClk) 320L else 120L
+            )
+        )
         val gesture = builder.build()
         return service.dispatchGesture(
             gesture,

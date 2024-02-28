@@ -31,6 +31,24 @@ public interface DyResId {
      */
     String LIVE_CENTER_CONTROL_PAGE = "com.ss.android.ugc.aweme.bullet.ui.BulletContainerActivity";
 
+    /**
+     * 抖音主页面
+     */
+    interface MAIN_PAGE {
+        String TAB_ROOT_VIEW = BASE_LAYOUT_ID + "root_view";
+        String TAB_HOME = BASE_LAYOUT_ID + "d5o";
+        String TAB_PLUS = BASE_LAYOUT_ID + "vk1";
+        String TAB_MINE = BASE_LAYOUT_ID + "vk4";
+    }
+
+    /**
+     * 我的页面
+     */
+    interface MINE_PAGE {
+//        String HSV_LAYOUT = BASE_LAYOUT_ID + "pgy";
+        String HSV_LAYOUT = BASE_LAYOUT_ID + "pji";
+    }
+
 
     /**
      * 直播间页面

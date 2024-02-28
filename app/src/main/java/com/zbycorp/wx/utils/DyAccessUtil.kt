@@ -2,8 +2,8 @@ package com.zbycorp.wx.utils
 
 import android.accessibilityservice.AccessibilityService
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.graphics.Rect
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
@@ -17,12 +17,10 @@ import com.zbycorp.wx.utils.AccessUtil.fillInput
 import com.zbycorp.wx.utils.AccessUtil.findNodesByViewId
 import com.zbycorp.wx.utils.AccessUtil.mockClkByNode
 import com.zbycorp.wx.utils.AccessUtil.scrollByNode
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
 
 internal object DyAccessUtil {
     const val TAG = "抖音"
@@ -50,7 +48,8 @@ internal object DyAccessUtil {
 
     fun openDyApp(activity: Activity) {
         val intent = Intent()
-        intent.flags = FLAG_ACTIVITY_NEW_TASK
+//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK // 保证每次进入到首页
         intent.setClassName(
             DyResId.DY_PACKAGE,
             DyResId.SPLASH_PAGE
@@ -58,10 +57,22 @@ internal object DyAccessUtil {
         activity.startActivity(intent)
     }
 
+    fun openPageByClsName(context: Context, actClsName: String) {
+        try {
+            val intent = Intent()
+            intent.setClassName(DyResId.DY_PACKAGE,actClsName)
+            context.startActivity(intent)
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     /**
      * 开始滚动
      */
-    private suspend fun startScroll(service: AccessibilityService, nodeInfo: AccessibilityNodeInfo) {
+    private fun startScroll(service: AccessibilityService, nodeInfo: AccessibilityNodeInfo) {
         if (nodeInfo.childCount > 0 && WEBVIEW == nodeInfo.getChild(0).className.toString()) {
             // 向上滑动
             val isScroll = scrollByNode(service, nodeInfo.getChild(0), 0, -240)
@@ -69,7 +80,7 @@ internal object DyAccessUtil {
         }
     }
 
-    private suspend fun getNodeRect(nodeInfo: AccessibilityNodeInfo): Rect? {
+    private fun getNodeRect(nodeInfo: AccessibilityNodeInfo): Rect? {
         if (nodeInfo == null) return null
         val rect = Rect()
         nodeInfo.toString().apply {
@@ -126,6 +137,42 @@ internal object DyAccessUtil {
             }
         }
         return rect
+    }
+
+    fun mainTab(service: AccessibilityService) {
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(3200)
+            AccessUtil.updateTips("模拟点击：我的")
+            val viewMineList = findNodesByViewId(service, DyResId.MAIN_PAGE.TAB_ROOT_VIEW)
+            if (viewMineList.isNullOrEmpty()) {
+                AccessUtil.updateTips("中断：我的节点ID变更")
+                return@launch
+            }
+
+            if (viewMineList.size > 1) {
+                val accessibilityNodeInfo = viewMineList[1].getChild(4)
+                val rect = getNodeRect(accessibilityNodeInfo)
+                if (rect != null) {
+                    mockClkByNode(service, rect)
+                }
+            }
+
+            delay(3200)
+            AccessUtil.updateTips("模拟点击：电商带货")
+            val viewList = findNodesByViewId(service, DyResId.MINE_PAGE.HSV_LAYOUT)
+            if (viewList.isNullOrEmpty()) {
+                AccessUtil.updateTips("中断：电商带货节点ID变更")
+                return@launch
+            }
+            if (viewList[0].childCount > 0) {
+                val accessibilityNodeInfo = viewList[0].getChild(0)
+                val targetNodeInfo = accessibilityNodeInfo.getChild(0)
+                val rect = getNodeRect(targetNodeInfo)
+                if (rect != null) {
+                    mockClkByNode(service, rect)
+                }
+            }
+        }
     }
 
     private suspend fun traverseNode(
@@ -225,7 +272,7 @@ internal object DyAccessUtil {
                                                     rect.top--
                                                     rect.bottom--
                                                     Thread.sleep(420)
-                                                    mockClkByNode(service, rect,false)
+                                                    mockClkByNode(service, rect)
                                                 }
                                                 Log.i(
                                                     TAG,
@@ -262,7 +309,7 @@ internal object DyAccessUtil {
                                                 if (rect != null) {
                                                     rect.top = 1254
                                                     rect.bottom = 1325
-                                                    mockClkByNode(service, rect!!, true)
+                                                    mockClkByNode(service, rect, isSend = true)
                                                     break
                                                 }
                                             }

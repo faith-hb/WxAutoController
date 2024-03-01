@@ -5,8 +5,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
+import android.text.TextUtils
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
+import com.lzf.easyfloat.utils.DisplayUtils
 import com.zbycorp.wx.contants.DyResId
 import com.zbycorp.wx.contants.DyResId.ACTION
 import com.zbycorp.wx.utils.AccessUtil.BUTTON_VIEW
@@ -14,17 +16,17 @@ import com.zbycorp.wx.utils.AccessUtil.EDIT_TEXT
 import com.zbycorp.wx.utils.AccessUtil.TEXT_VIEW
 import com.zbycorp.wx.utils.AccessUtil.WEBVIEW
 import com.zbycorp.wx.utils.AccessUtil.fillInput
-import com.zbycorp.wx.utils.AccessUtil.findNodesByText
 import com.zbycorp.wx.utils.AccessUtil.findNodesByViewId
 import com.zbycorp.wx.utils.AccessUtil.mockClkByNode
 import com.zbycorp.wx.utils.AccessUtil.scrollByNode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal object DyAccessUtil {
-    const val TAG = "抖音"
+    const val TAG = "DyAccessUtil:"
 
     /**
      * 他人主页的自动化是否执行完毕
@@ -81,160 +83,168 @@ internal object DyAccessUtil {
         }
     }
 
-    private fun getNodeRect(nodeInfo: AccessibilityNodeInfo): Rect? {
-        if (nodeInfo == null) return null
-        val rect = Rect()
-        nodeInfo.toString().apply {
-            val boundsInScreen = substring(
-                indexOf("boundsInScreen: Rect") + "boundsInScreen: Rect".length,
-                indexOf(
-                    ";",
-                    indexOf("boundsInScreen: Rect")
-                )
-            )
-            Log.i(
-                TAG,
-                "getNodeRect：讲解 boundsInScreen=$boundsInScreen"
-            )
-            boundsInScreen.apply {
-                var indexS = 0
-                var left =
-                    substring(
-                        indexOf("(") + 1,
-                        indexOf(",")
-                    ).toInt()
-                var top =
-                    substring(
-                        indexOf(", ") + 2,
-                        indexOf(" -")
-                    ).toInt()
-                indexS = indexOf(",", indexOf("- "))
-                var right =
-                    substring(
-                        indexOf("- ") + 2,
-                        indexS
-                    ).toInt()
-                var bottom =
-                    substring(
-                        indexOf(
-                            ", ",
-                            indexS
-                        ) + 2,
-                        indexOf(")")
-                    ).toInt()
-                Log.i(
-                    TAG,
-                    "getNodeRect：商品item按钮坐标 left=$left top=$top right=$right bottom=$bottom"
-                )
-                rect.left = left
-                rect.top = top
-                rect.right = right
-                rect.bottom = bottom
-
-                Log.i(
-                    TAG,
-                    "getNodeRect：商品item中讲解按钮坐标 left=${rect.left} top=${rect.top} right=${rect.right} bottom=${rect.bottom}"
-                )
-            }
-        }
-        return rect
-    }
-
     fun mainTab(service: AccessibilityService) {
         GlobalScope.launch(Dispatchers.Main) {
             delay(3200)
             AccessUtil.updateTips("模拟点击：我的")
-            val viewMineList = findNodesByViewId(service, DyResId.MAIN_PAGE.TAB_ROOT_VIEW)
-            if (viewMineList.isNullOrEmpty()) {
-                AccessUtil.updateTips("中断：我的节点ID变更")
-                return@launch
-            }
-
-            if (viewMineList.size > 1) {
-                val accessibilityNodeInfo = viewMineList[1].getChild(4)
-                val rect = getNodeRect(accessibilityNodeInfo)
-                if (rect != null) {
-                    mockClkByNode(service, rect)
-                }
-            }
+            // 获取当前活动窗口的根节点
+            val rootNode = service.rootInActiveWindow
+            AccessUtil.traverseNodeByTxt(service, rootNode, "我", isExecuteClk = true)
 
             delay(3200)
             AccessUtil.updateTips("模拟点击：电商带货")
             val viewList = findNodesByViewId(service, DyResId.MINE_PAGE.HSV_LAYOUT)
             if (viewList.isNullOrEmpty()) {
                 AccessUtil.updateTips("中断：电商带货节点ID变更")
+                cancel()
                 return@launch
             }
             if (viewList[0].childCount > 0) {
                 val accessibilityNodeInfo = viewList[0].getChild(0)
                 val targetNodeInfo = accessibilityNodeInfo.getChild(0)
-                val rect = getNodeRect(targetNodeInfo)
-                if (rect != null) {
-                    mockClkByNode(service, rect)
+                if (targetNodeInfo != null) {
+                    val rect = AccessUtil.getNodeRect(targetNodeInfo)
+                    if (rect != null) {
+
+                        AccessUtil.getActivity()?.let {
+                            AccessUtil.showAssistBox(it, rect)
+                            delay(3200)
+                            AccessUtil.dismissAssistBox()
+                        }
+                        delay(600)
+
+                        mockClkByNode(service, rect)
+                        cancel()
+                    }
                 }
             }
+        }
+    }
 
-            delay(3200)
-            AccessUtil.updateTips("模拟点击：去直播中控")
-            val viewCenterList = findNodesByText(service, "去直播中控")
-            if (viewCenterList.isNullOrEmpty()) {
-                AccessUtil.updateTips("中断：去直播中控节点ID变更")
-                return@launch
-            }
-            val rect = getNodeRect(viewCenterList[0])
+    private suspend fun traverseNodeCenter(service: AccessibilityService, node: AccessibilityNodeInfo?) {
+        if (node == null) return
+        var isExist = false
+        // 处理当前节点，满足节点条件即终止遍历
+        if (node.text != null && TextUtils.equals(node.text, "直播中控")) {
+            isExist = true
+            AccessUtil.updateTips("锁定目标")
+            Log.i(TAG, "traverseNodeCenter：找到【直播中控】节点")
+            val rect = AccessUtil.getNodeRect(node)
             if (rect != null) {
+                AccessUtil.getActivity()?.let {
+                    AccessUtil.showAssistBox(it, rect)
+                    delay(3200)
+                    AccessUtil.dismissAssistBox()
+                }
+                delay(600)
                 mockClkByNode(service, rect)
             }
+        }
+//        Log.i(TAG, "traverseNodeCenter：node.text=${node.text} isExist=$isExist")
+        for (i in 0 until node.childCount) {
+            if (isExist) {
+                break
+            }
+            val childNode = node.getChild(i)
+            traverseNodeCenter(service, childNode)
+        }
+    }
+
+    private fun traverseNodeGetWebView(
+        service: AccessibilityService, node: AccessibilityNodeInfo?
+    ): AccessibilityNodeInfo? {
+        if (node == null) return null
+        var isExit = false
+        // 处理当前节点，满足节点条件即终止遍历
+        if (WEBVIEW == node.className.toString()) {
+            isExit = true
+        }
+        for (i in 0 until node.childCount) {
+            if (isExit) {
+                break
+            }
+            val childNode = node.getChild(i)
+            traverseNodeGetWebView(service, childNode)
+        }
+        return node
+    }
+
+    private suspend fun traverseNodeExplain(
+        shopName: String, service: AccessibilityService, node: AccessibilityNodeInfo?, scrollY: Int
+    ) {
+        if (node == null) return
+        val rectExplain = Rect()
+        // 处理当前节点，满足节点条件即终止遍历
+        if (BUTTON_VIEW == node.className.toString() && node.text != null && node.text.contains(shopName)) {
+            AccessUtil.updateTips("商品讲解：$shopName")
+            val rect = AccessUtil.getNodeRect(node)
+            if (rect != null) {
+                // 精准计算ItemView坐标
+                if (rect.right > 1080) {
+                    rect.right = 1080
+                }
+                rect.top = rect.top + Math.abs(scrollY)
+                rect.bottom = rect.bottom + Math.abs(scrollY)
+                Log.i(TAG, "traverseNodeExplain=>rect=$rect")
+                AccessUtil.getActivity()?.let {
+//                    val statusH = DisplayUtils.getStatusBarHeight(it)
+                    val showRect = Rect(rect)
+//                    showRect.top = showRect.top - statusH
+//                    showRect.bottom = showRect.bottom - statusH
+                    AccessUtil.showAssistBox(it, showRect)
+                    delay(3200)
+                    AccessUtil.dismissAssistBox()
+                }
+
+//                delay(1200)
+//                rectExplain.right = rect.right - 40
+//                rectExplain.left = rectExplain.right - 202
+//                rectExplain.bottom = rect.bottom - 68
+//                rectExplain.top = rectExplain.bottom - 68
+//
+//
+//                AccessUtil.getActivity()?.let {
+//                    AccessUtil.showAssistBox(it, rectExplain)
+//                    delay(3200)
+//                    AccessUtil.dismissAssistBox()
+//                }
+//
+//                AccessUtil.updateTips("模拟点击：准备话术【$shopName】")
+//                delay(1200)
+//                mockClkByNode(service, rectExplain, isSend = false, isLongClk = false)
+
+                // 从ItemView中计算【讲解】坐标
+                rectExplain.right = rect.right - 46
+                rectExplain.left = rectExplain.right - 130
+                rectExplain.bottom = rect.bottom - 52
+                rectExplain.top = rectExplain.bottom - 72
+
+                Log.i(TAG, "traverseNodeExplain=>rectExplain=$rectExplain")
+                AccessUtil.getActivity()?.let {
+                    AccessUtil.showAssistBox(it, rectExplain)
+                    delay(3200)
+                    AccessUtil.dismissAssistBox()
+                }
+                AccessUtil.updateTips("模拟点击：讲解【$shopName】商品")
+                delay(600)
+                mockClkByNode(service, rectExplain, isSend = false, isLongClk = false)
+                return
+            }
+        }
+        for (i in 0 until node.childCount) {
+            val childNode = node.getChild(i)
+            traverseNodeExplain(shopName, service, childNode, scrollY)
         }
     }
 
     fun centerTab(service: AccessibilityService) {
         GlobalScope.launch(Dispatchers.Main) {
-            delay(3200)
-            AccessUtil.updateTips("模拟点击：去直播中控")
-            val viewCenterList = findNodesByViewId(service, DyResId.LIVE_DUMMY_PAGE.IOE)
-            if (viewCenterList.isNullOrEmpty()) {
-                AccessUtil.updateTips("中断：去直播中控节点ID变更")
-                return@launch
-            }
-            val accessibilityNodeInfo1 = viewCenterList[0]
-            if (accessibilityNodeInfo1.childCount > 0) {
-                // FrameLayout
-                val accessibilityNodeInfo2 = accessibilityNodeInfo1.getChild(0)
-                if (accessibilityNodeInfo2.childCount > 0) {
-                    // WebView
-                    val accessibilityNodeInfo3 = accessibilityNodeInfo2.getChild(0)
-                    if (accessibilityNodeInfo3.childCount > 0) {
-                        // WebView
-                        val accessibilityNodeInfo4 = accessibilityNodeInfo3.getChild(0)
-                        if (accessibilityNodeInfo4.childCount > 0) {
-                            // View
-                            val accessibilityNodeInfo5 = accessibilityNodeInfo4.getChild(0)
-                            if (accessibilityNodeInfo5.childCount > 0) {
-                                // View
-                                val accessibilityNodeInfo6 = accessibilityNodeInfo5.getChild(0)
-                                val count = accessibilityNodeInfo6.childCount
-                                if (count > 9) {
-                                    val accessibilityNodeInfo = accessibilityNodeInfo6.getChild(9)
-                                    if (accessibilityNodeInfo.childCount > 4) {
-                                        val nodeInfo1 = accessibilityNodeInfo.getChild(4)
-                                        if (nodeInfo1.childCount > 3) {
-                                            val nodeInfo2 = nodeInfo1.getChild(3)
-                                            val rect = getNodeRect(nodeInfo2)
-                                            if (rect != null) {
-                                                mockClkByNode(service, rect)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-
-
+            delay(4200)
+            AccessUtil.updateTips("模拟点击：直播中控")
+            delay(1200)
+            // 获取当前活动窗口的根节点
+            val rootNode = service.rootInActiveWindow
+            traverseNodeCenter(service, rootNode)
         }
     }
 
@@ -325,7 +335,7 @@ internal object DyAccessUtil {
                                             "六级递归111：buttonView内容=${childNodeInfo7.text}"
                                         )
                                         if (ACTION.EXPLAIN_GOODS == action) {
-                                            val rect = getNodeRect(childNodeInfo7)
+                                            val rect = AccessUtil.getNodeRect(childNodeInfo7)
                                             if (rect != null) {
                                                 rect.left = rect.right - 160
                                                 rect.top = rect.bottom - 65
@@ -368,7 +378,7 @@ internal object DyAccessUtil {
                                                     TAG,
                                                     "七级递归：点击发送按钮 childNodeInfo8=${childNodeInfo8}"
                                                 )
-                                                val rect = getNodeRect(childNodeInfo8)
+                                                val rect = AccessUtil.getNodeRect(childNodeInfo8)
                                                 if (rect != null) {
                                                     rect.top = 1254
                                                     rect.bottom = 1325
@@ -449,37 +459,28 @@ internal object DyAccessUtil {
 
     fun liveCenterControlMessage(service: AccessibilityService) {
         GlobalScope.launch(Dispatchers.Main) {
-            delay(3200)
-            AccessUtil.updateTips("模拟点击：讲解商品")
-            var viewGoodsList = findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
-            if (viewGoodsList?.isEmpty() == true) { // 走备用ID
-                viewGoodsList =
-                    findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID_BACKUP)
-            }
-            Log.i(TAG, "viewList size=${viewGoodsList?.size}")
-            if (viewGoodsList?.isEmpty() == true) {
-                Log.i(TAG, "自动化停止，没有找到节点信息")
-                return@launch
-            }
-            Log.i(TAG, "***************讲解商品->start*********************")
-            AccessUtil.updateTips("模拟点击：开始讲解（第一个商品）")
-            traverseNode(ACTION.EXPLAIN_GOODS, service, viewGoodsList!![0])
-            Log.i(TAG, "***************讲解商品->end*********************")
-
+            delay(5200)
 //            Log.i(TAG, "***************滑动->start*********************")
-//            delay(3200)
-//            var viewScrollList =
-//                findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
-//            if (viewScrollList?.isEmpty() == true) {
-//                viewScrollList =
-//                    findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID_BACKUP)
-//            }
-//            if (viewScrollList?.isEmpty() == true) {
-//                Log.i(TAG, "***************滑动->无根节点信息*********************")
-//                return@launch
-//            }
-//            traverseNode(ACTION.START_SCROLL, service, viewScrollList!![0])
-//            Log.i(TAG, "***************滑动->end*********************")
+            AccessUtil.updateTips("模拟滑动：向上滑动${240/2}个像素")
+//            // 获取当前活动窗口的根节点
+            val rootNode = service.rootInActiveWindow
+            val nodeInfo = traverseNodeGetWebView(service, rootNode)
+            if (nodeInfo != null) {
+                val isScroll = scrollByNode(service, nodeInfo, 0, -240)
+                Log.i(TAG, "webview滑动：isScroll=$isScroll")
+            }
+            Log.i(TAG, "***************滑动->end*********************")
+
+            // mock讲解第一个商品
+            delay(5200)
+            traverseNodeExplain("嘿满赞北部湾食盐", service, rootNode,-240)
+
+            // mock讲解第二个商品
+            delay(3200)
+            traverseNodeExplain("洁丽雅浴室拖鞋男四季", service, rootNode,-240)
+
+            return@launch
+
 
             Log.i(TAG, "***************用户评论->start*********************")
             delay(3200)
@@ -496,22 +497,6 @@ internal object DyAccessUtil {
             }
             traverseNode(ACTION.USER_COMMENT, service, viewCommentList!![0])
             Log.i(TAG, "***************用户评论->end*********************")
-
-            Log.i(TAG, "***************滑动->start*********************")
-            delay(1200)
-            AccessUtil.updateTips("模拟向上滑动")
-            var viewScrollList =
-                findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID)
-            if (viewScrollList?.isEmpty() == true) {
-                viewScrollList =
-                    findNodesByViewId(service, DyResId.LIVE_CENTER_CONTROL_PAGE.ROOT_ID_BACKUP)
-            }
-            if (viewScrollList?.isEmpty() == true) {
-                Log.i(TAG, "***************滑动->无根节点信息*********************")
-                return@launch
-            }
-            traverseNode(ACTION.START_SCROLL, service, viewScrollList!![0])
-            Log.i(TAG, "***************滑动->end*********************")
 
             if (!commentIsExecuteFinish) return@launch
             Log.i(TAG, "***************输入评论->start*********************")

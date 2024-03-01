@@ -27,6 +27,10 @@ public interface DyResId {
      */
     String LIVE_PAGE = "com.ss.android.ugc.aweme.live.LivePlayActivity";
     /**
+     * 电商带货页面
+     */
+    String LIVE_DUMMY = "com.ss.android.ugc.aweme.live.LiveDummyActivity";
+    /**
      * 直播中控
      */
     String LIVE_CENTER_CONTROL_PAGE = "com.ss.android.ugc.aweme.bullet.ui.BulletContainerActivity";
@@ -75,6 +79,7 @@ public interface DyResId {
      * 电商带货页面
      */
     interface LIVE_DUMMY_PAGE {
+        String ROOT = "root";
         String IOE = BASE_LAYOUT_ID + "ioe";
         String SHOP_WINDOW_MAIN_PAGE_CONTAINER = "shopWindowMainPageContainer";
     }

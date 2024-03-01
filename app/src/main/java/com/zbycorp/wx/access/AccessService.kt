@@ -89,24 +89,26 @@ class AccessService : AccessibilityService() {
     private fun handleDyEvent(event: AccessibilityEvent) {
         when (event.className.toString()) {
             DyResId.MAIN_PAGE -> {
-                AccessUtil.updateTips("进入首页")
+                AccessUtil.updateTips("进入【首页】")
                 DyAccessUtil.mainTab(this)
             }
 
-            "com.ss.android.ugc.aweme.live.LiveDummyActivity" -> {
-                AccessUtil.updateTips("进入电商带货页面")
+            DyResId.LIVE_DUMMY -> {
+                AccessUtil.updateTips("进入【电商带货】页面")
+                serviceInfo.flags = AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY
                 DyAccessUtil.centerTab(this)
             }
 
-            DyResId.LIVE_PAGE -> {
-
+            DyResId.LIVE_CENTER_CONTROL_PAGE -> {
+                AccessUtil.updateTips("进入【直播中控】页面")
+//                serviceInfo.flags =
+//                    serviceInfo.flags or AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY
+                serviceInfo.flags = AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY
+                DyAccessUtil.liveCenterControlMessage(this)
             }
 
-            DyResId.LIVE_CENTER_CONTROL_PAGE -> {
-                AccessUtil.updateTips("进入直播中控页面")
-                serviceInfo.flags =
-                    serviceInfo.flags or AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY
-                DyAccessUtil.liveCenterControlMessage(this@AccessService)
+            DyResId.LIVE_PAGE -> {
+                AccessUtil.updateTips("进入直播间页面")
             }
 
             else -> {

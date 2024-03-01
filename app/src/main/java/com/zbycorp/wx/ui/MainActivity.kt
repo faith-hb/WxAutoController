@@ -1,7 +1,9 @@
 package com.zbycorp.wx.ui
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
@@ -9,11 +11,17 @@ import android.provider.Settings.SettingNotFoundException
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.lzf.easyfloat.utils.DisplayUtils
 import com.zbycorp.wx.contants.DyResId
 import com.zbycorp.wx.databinding.ActivityMainBinding
 import com.zbycorp.wx.utils.AccessUtil
 import com.zbycorp.wx.utils.DyAccessUtil
 import com.zbycorp.wx.utils.KsAccessUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,9 +33,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.i("MainActivity1", "onCreate...")
+        Log.i(TAG, "onCreate...")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        AccessUtil.bindActivity(this)
         binding.btnOpenKs.setOnClickListener {
             if (safeCheckWhenOpenApp()) {
                 AccessUtil.updateTips("进入快手APP")
@@ -39,6 +48,13 @@ class MainActivity : AppCompatActivity() {
                 AccessUtil.updateTips("进入抖音APP")
                 DyAccessUtil.openDyApp(this)
             }
+            // 测试辅助框效果
+//            val rect = Rect(0, 973, 1076, 1336)
+//            val rect = Rect(0, 973, 1083, 1336)
+//            val statusH = AccessUtil.getStatusBarHeight(this)
+//            Log.i(TAG, "statusH=$statusH statusH1=${DisplayUtils.getStatusBarHeight(this)}")
+//            val rect = Rect(0, 200 - statusH, 1080, 676)
+//            AccessUtil.showAssistBox(this, rect)
         }
         binding.btnSend.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
@@ -62,6 +78,12 @@ class MainActivity : AppCompatActivity() {
         AccessUtil.updateTips("Demo演示操作准备中\n请先开启无障碍服务")
         if (isAccessibilitySettingsOn(this)) {
             AccessUtil.updateTips("Demo演示操作准备中\n无障碍服务已开启")
+            // 自动触发打开抖音动作
+            GlobalScope.launch(Dispatchers.Main) {
+                delay(2000)
+                AccessUtil.updateTips("进入抖音APP")
+                DyAccessUtil.openDyApp(this@MainActivity)
+            }
         }
     }
 
@@ -96,16 +118,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+        Log.i(TAG, "onBackPressed...")
         finish()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i("MainActivity1", "onDestroy...")
-        KsAccessUtil.userProfileIsExecuteFinish = false
-        KsAccessUtil.imChatIsExecuteFinish = false
+        Log.i(TAG, "onDestroy...")
         AccessUtil.dismissWindowTips()
-        AccessUtil.dismissWindowRect()
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        am.killBackgroundProcesses(packageName)
     }
 
 }

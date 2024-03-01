@@ -10,16 +10,26 @@ import android.content.Context
 import android.graphics.Path
 import android.graphics.Point
 import android.graphics.Rect
+import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import android.widget.Toast
 import com.lzf.easyfloat.EasyFloat
 import com.lzf.easyfloat.enums.ShowPattern
+import com.lzf.easyfloat.interfaces.OnFloatAnimator
+import com.lzf.easyfloat.utils.DisplayUtils
 import com.zbycorp.wx.R
+import com.zbycorp.wx.tools.AssistRectView
 import com.zbycorp.wx.ui.RectView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("StaticFieldLeak")
 internal object AccessUtil {
@@ -43,15 +53,34 @@ internal object AccessUtil {
      */
     val WEBVIEW = "android.webkit.WebView"
 
+    private var mAct: Activity? = null
+
+    fun bindActivity(act: Activity?) {
+        mAct = act
+    }
+
+    fun getActivity(): Activity? {
+        return mAct
+    }
+
     fun showToast(context: Context, msg: String) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    fun getStatusBarHeight(context: Context): Int {
+        var statusBarHeight = 0
+        val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            statusBarHeight = context.resources.getDimensionPixelSize(resourceId)
+        }
+        return statusBarHeight
     }
 
     /**
      * Gesture手势实现滚动(Android7+)
      * 解决滚动距离不可控制问题
      * @param distanceX 向右滚动为负值 向左滚动为正值
-     * @param distanceY 向下滚动为负值 向上滚动为正值
+     * @param distanceY 向上滚动为负值 向下滚动为正值
      */
     fun scrollByNode(
         service: AccessibilityService,
@@ -101,32 +130,37 @@ internal object AccessUtil {
         if (isSend) {
             point = Point(rect.right - 10, (rect.top + rect.bottom) / 2)
         }
-        val builder = GestureDescription.Builder()
         val path = Path()
         val pointX = point.x.toFloat()
         val pointY = point.y.toFloat()
+        if (pointX < 0 || pointY < 0) {
+            Log.e(TAG, "mockClkByNode=>path路径不能为负数")
+            return false
+        }
         path.moveTo(pointX, pointY)
 //        path.lineTo(pointX, pointY)
-        Log.e(
-            TAG,
-            "moveStartX=${point.x.toFloat()} moveStartY=${point.y.toFloat()}"
-        )
+//        if (isSend) {
+//            path.moveTo(pointX, pointY)
+//            path.lineTo(pointX, pointY)
+//        } else {
+//            path.moveTo(pointX, pointY)
+//        }
+        Log.e(TAG, "mockClkByNode=>pointX=$pointX pointY=$pointY")
         // duration参数设置320会触发长按事件
-        builder.addStroke(
+        val gesture = GestureDescription.Builder().addStroke(
             GestureDescription.StrokeDescription(
-                path, 50L, if (isLongClk) 320L else 120L
+                path, 0L, if (isLongClk) 320L else 120L
             )
-        )
-        val gesture = builder.build()
+        ).build()
         return service.dispatchGesture(
             gesture,
             object : AccessibilityService.GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
-                    Log.e(TAG, "click ok onCompleted pointX=$pointX pointY=$pointY")
+                    Log.i(TAG, "mockClkByNode=>click ok onCompleted pointX=$pointX pointY=$pointY")
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription) {
-                    Log.e(TAG, "click ok onCancelled")
+                    Log.i(TAG, "mockClkByNode=>click ok onCancelled")
                 }
             },
             null
@@ -258,6 +292,119 @@ internal object AccessUtil {
         return if (service.rootInActiveWindow != null) service.rootInActiveWindow.findAccessibilityNodeInfosByText(text) else null
     }
 
+    fun getNodeRect(nodeInfo: AccessibilityNodeInfo): Rect? {
+        if (nodeInfo == null) return null
+        val rect = Rect()
+        nodeInfo.toString().apply {
+            val boundsInScreen = substring(
+                indexOf("boundsInScreen: Rect") + "boundsInScreen: Rect".length,
+                indexOf(
+                    ";",
+                    indexOf("boundsInScreen: Rect")
+                )
+            )
+            Log.i(
+                TAG,
+                "getNodeRect：nodeInfo=$nodeInfo"
+            )
+            Log.i(
+                TAG,
+                "getNodeRect：boundsInScreen=$boundsInScreen"
+            )
+            boundsInScreen.apply {
+                var indexS = 0
+                var left =
+                    substring(
+                        indexOf("(") + 1,
+                        indexOf(",")
+                    ).toInt()
+                var top =
+                    substring(
+                        indexOf(", ") + 2,
+                        indexOf(" -")
+                    ).toInt()
+                indexS = indexOf(",", indexOf("- "))
+                var right =
+                    substring(
+                        indexOf("- ") + 2,
+                        indexS
+                    ).toInt()
+                var bottom =
+                    substring(
+                        indexOf(
+                            ", ",
+                            indexS
+                        ) + 2,
+                        indexOf(")")
+                    ).toInt()
+//                Log.i(
+//                    TAG,
+//                    "getNodeRect：商品item按钮坐标 left=$left top=$top right=$right bottom=$bottom"
+//                )
+                rect.left = left
+                rect.top = top
+                rect.right = right
+                rect.bottom = bottom
+
+//                Log.i(
+//                    TAG,
+//                    "getNodeRect：商品item中讲解按钮坐标 left=${rect.left} top=${rect.top} right=${rect.right} bottom=${rect.bottom}"
+//                )
+            }
+        }
+        return rect
+    }
+
+    fun traverseNodeByTxt(
+        service: AccessibilityService,
+        node: AccessibilityNodeInfo?,
+        txt: String,
+        isExecuteClk: Boolean = false
+    ) {
+        if (node == null) return
+        var isExist = false
+        // 处理当前节点，满足节点条件即终止遍历
+        if (node.text != null && TextUtils.equals(node.text, txt)) {
+            isExist = true
+            updateTips("锁定目标")
+            Log.i(DyAccessUtil.TAG, "traverseNodeCenter：找到【$txt】节点")
+            val rect = getNodeRect(node)
+            if (rect != null) {
+                mockClkByNode(service, rect)
+            }
+        }
+//        Log.i(TAG, "traverseNodeCenter：node.text=${node.text} isExist=$isExist")
+        for (i in 0 until node.childCount) {
+            if (isExist) {
+                break
+            }
+            val childNode = node.getChild(i)
+            traverseNodeByTxt(service, childNode, txt, isExecuteClk)
+        }
+    }
+
+    fun showAssistBox(context: Activity, rect: Rect) {
+        val layout = AssistRectView(context, rect)
+        layout.setOnClickListener {
+            dismissAssistBox()
+        }
+        EasyFloat.with(context).setShowPattern(ShowPattern.ALL_TIME).setLayout(layout)
+            .setMatchParent(widthMatch = true)
+            .setGravity(
+                Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK,
+                offsetY = -DisplayUtils.getStatusBarHeight(context)
+            )
+            .setDisplayHeight { context ->
+                DisplayUtils.getScreenHeight(context)
+            }
+            .setTag("assistBox")
+            .show()
+    }
+
+    fun dismissAssistBox() {
+        EasyFloat.dismiss(tag = "assistBox", force = true)
+    }
+
     var mTargetTv: TextView? = null
     fun showWindowTips(context: Activity) {
         var layout = LayoutInflater.from(context).inflate(R.layout.pop_window, null)
@@ -273,39 +420,7 @@ internal object AccessUtil {
     }
 
     fun updateTips(tips: String) {
-//        mTargetTv?.apply {
-//            post {
-//                Log.e(TAG,"tips内容：$tips")
-//                text = tips
-//            }
-//        }
-//        GlobalScope.launch(Dispatchers.Main) {
-            Log.e(TAG,"tips内容：$tips")
-            mTargetTv?.text = tips
-//        }
-    }
-
-    var mRectView: RectView? = null
-    var mRectBuilder: EasyFloat.Builder? = null
-    fun showRectCheck(context: Context, rect: Rect, x: Int, y: Int) {
-        var layout = LayoutInflater.from(context).inflate(R.layout.rect_view, null)
-        mRectView = layout.findViewById(R.id.rv_check)
-        mRectView?.setRect(rect)
-        mRectBuilder = EasyFloat.with(context)
-        mRectBuilder?.apply {
-            setTag("rectView").setShowPattern(ShowPattern.ALL_TIME)
-//                .setLocation(x, y)
-                .setLayout(layout)
-                .setMatchParent(widthMatch = true)
-                .show()
-        }
-    }
-
-    fun dismissWindowRect() {
-        EasyFloat.dismiss(tag = "rectView",force = true)
-    }
-
-    fun updateRect(rect: Rect){
-        mRectView?.setRect(rect)
+        Log.e(TAG, "tips内容：$tips")
+        mTargetTv?.text = tips
     }
 }

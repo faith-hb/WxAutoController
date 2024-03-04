@@ -3,21 +3,18 @@ package com.zbycorp.wx.ui
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Rect
 import android.os.Bundle
-import android.os.Handler
 import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.lzf.easyfloat.utils.DisplayUtils
-import com.zbycorp.wx.contants.DyResId
+import com.zbycorp.wx.capture.CaptureManager
+import com.zbycorp.wx.capture.CaptureManager.Companion.REQUEST_MEDIA_PROJECTION
 import com.zbycorp.wx.databinding.ActivityMainBinding
 import com.zbycorp.wx.utils.AccessUtil
 import com.zbycorp.wx.utils.DyAccessUtil
 import com.zbycorp.wx.utils.KsAccessUtil
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -26,6 +23,7 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var isStartCapture = false
 
     companion object {
         const val TAG = "MainActivity"
@@ -37,12 +35,23 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         AccessUtil.bindActivity(this)
+        clkBtnListenerOpenKs()
+        clkBtnListenerOpenDy()
+        clkBtnListenerOpenService()
+        clkBtnListenerOutCapture()
+        AccessUtil.showWindowTips(this)
+    }
+
+    private fun clkBtnListenerOpenKs() {
         binding.btnOpenKs.setOnClickListener {
             if (safeCheckWhenOpenApp()) {
                 AccessUtil.updateTips("进入快手APP")
                 KsAccessUtil.openKsApp(this)
             }
         }
+    }
+
+    private fun clkBtnListenerOpenDy() {
         binding.btnOpenDy.setOnClickListener {
             if (safeCheckWhenOpenApp()) {
                 AccessUtil.updateTips("进入抖音APP")
@@ -56,7 +65,10 @@ class MainActivity : AppCompatActivity() {
 //            val rect = Rect(0, 200 - statusH, 1080, 676)
 //            AccessUtil.showAssistBox(this, rect)
         }
-        binding.btnSend.setOnClickListener {
+    }
+
+    private fun clkBtnListenerOpenService() {
+        binding.btnOpenService.setOnClickListener {
             if (isAccessibilitySettingsOn(this@MainActivity)) {
                 AccessUtil.updateTips("服务已开启，可以打开抖音｜快手进行体验")
             } else {
@@ -70,7 +82,12 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
-        AccessUtil.showWindowTips(this)
+    }
+
+    private fun clkBtnListenerOutCapture() {
+        binding.btnOutCapture.setOnClickListener {
+            CaptureManager.instance.startCapture(this, binding.ivCapture)
+        }
     }
 
     override fun onResume() {
@@ -89,7 +106,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun safeCheckWhenOpenApp(): Boolean {
         if (!isAccessibilitySettingsOn(this)) {
-//            AccessUtil.showToast(this, "请先开启无障碍服务")
             return false
         }
         return true
@@ -103,7 +119,7 @@ class MainActivity : AppCompatActivity() {
                 Settings.Secure.ACCESSIBILITY_ENABLED
             )
         } catch (e: SettingNotFoundException) {
-            Log.i("URL", "错误信息为：" + e.message)
+            Log.i(TAG, "错误信息为：" + e.message)
         }
 
         if (accessibilityEnabled == 1) {
@@ -114,6 +130,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return false
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_MEDIA_PROJECTION) {
+            if (resultCode != RESULT_OK) {
+                Log.i(TAG, "User cancelled")
+                return
+            }
+            CaptureManager.instance.apply {
+                bindOnActivityResult(this@MainActivity, resultCode, data)
+                handleCapture(binding.ivCapture)
+            }
+        }
     }
 
     override fun onBackPressed() {

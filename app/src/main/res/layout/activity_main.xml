@@ -9,6 +9,22 @@
     android:orientation="vertical"
     tools:context=".ui.MainActivity">
 
+    <ImageView
+        android:id="@+id/iv_capture"
+        android:layout_width="200dp"
+        android:layout_height="300dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/holo_purple" />
+
+    <Button
+        android:id="@+id/btn_out_capture"
+        android:layout_width="200dp"
+        android:layout_height="66dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="应用外截屏" />
+
     <Button
         android:id="@+id/btn_open_ks"
         android:layout_width="200dp"
@@ -28,7 +44,7 @@
         android:text="打开抖音APP" />
 
     <Button
-        android:id="@+id/btn_send"
+        android:id="@+id/btn_open_service"
         android:layout_width="200dp"
         android:layout_height="66dp"
         android:layout_marginStart="8dp"
